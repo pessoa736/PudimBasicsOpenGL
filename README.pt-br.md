@@ -2,6 +2,8 @@
 
 Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas** e **tempo**. Tratamento de entrada e utilitários de matemática ficam a critério do desenvolvedor.
 
+> [warning] Este projeto está em estado *experimental*. APIs e funcionalidades podem mudar sem aviso — use com cautela.
+
 ## Recursos
 
 - **Janela**: Criação e gerenciamento de janelas OpenGL com VSync, fullscreen e suporte a redimensionamento
