@@ -1,4 +1,4 @@
-# PudimBasicsGl - Pudim OpenGL Basics 
+# PudimBasicsGl - Pudim Basics OpenGL 
 
 Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas** e **tempo**. Tratamento de entrada e utilitários de matemática ficam a critério do desenvolvedor.
 
