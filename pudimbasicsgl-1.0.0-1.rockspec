@@ -3,7 +3,7 @@ version = "1.0.0-1"
 
 source = {
     url = "https://github.com/pessoa736/PudimBasicsOpenGL.git",
-    tag = "v1.0.0"
+    tag = "v1.0.0-1"
 }
 
 description = {
@@ -44,16 +44,19 @@ external_dependencies = {
 
 build = {
     type = "make",
+    build_target = "all",
+    install_target = "",  -- Don't use makefile's install (it uses sudo)
     build_variables = {
         CFLAGS = "$(CFLAGS) -fPIC -I$(LUA_INCDIR)",
         LDFLAGS = "$(LIBFLAG) -L$(LUA_LIBDIR)"
     },
-    install_variables = {
-        INST_LIBDIR = "$(LIBDIR)"
-    },
+    copy_directories = { "examples" },
     install = {
         lib = {
             ["PudimBasicsGl"] = "PudimBasicsGl.so"
+        },
+        bin = {
+            ["pbgl"] = "bin/pbgl"
         }
     }
 }

@@ -1,0 +1,90 @@
+#!/usr/bin/env lua
+-- PudimBasicsGl CLI (pbgl)
+
+-- Get the installation path of examples
+local function get_examples_path()
+    local info = debug.getinfo(1, "S")
+    local script_path = info.source:match("^@(.+)$")
+    if script_path then
+        local package_root = script_path:match("(.+)/bin/pbgl$")
+        if package_root then
+            return package_root .. "/examples"
+        end
+    end
+    
+    for path in package.path:gmatch("[^;]+") do
+        local examples_path = path:gsub("%?%.lua$", "pudimbasicsgl/examples")
+        local f = io.open(examples_path .. "/main.lua", "r")
+        if f then
+            f:close()
+            return examples_path
+        end
+    end
+    return nil
+end
+
+local function copy_file(src, dst)
+    local input = io.open(src, "rb")
+    if not input then return false end
+    local content = input:read("*all")
+    input:close()
+    
+    local output = io.open(dst, "wb")
+    if not output then return false end
+    output:write(content)
+    output:close()
+    return true
+end
+
+local function list_files(dir)
+    local files = {}
+    local handle = io.popen('ls -1 "' .. dir .. '" 2>/dev/null')
+    if handle then
+        for file in handle:lines() do
+            table.insert(files, file)
+        end
+        handle:close()
+    end
+    return files
+end
+
+-- Commands
+local cmd = arg[1]
+
+if cmd == "show-examples" then
+    local examples_path = get_examples_path()
+    if not examples_path then
+        print("Error: Could not find examples directory")
+        os.exit(1)
+    end
+    
+    os.execute('mkdir -p demos')
+    print("Copying demos to ./demos/\n")
+    
+    local files = list_files(examples_path)
+    local copied = 0
+    
+    for _, file in ipairs(files) do
+        if file:match("%.lua$") then
+            if copy_file(examples_path .. "/" .. file, "demos/" .. file) then
+                print("  ✓ " .. file)
+                copied = copied + 1
+            end
+        end
+    end
+    
+    print(string.format("\nCopied %d demo(s). Run with: lua demos/main.lua", copied))
+else
+    print([[
+PudimBasicsGl - Pudim OpenGL Basics
+
+Usage: pbgl <command>
+
+Commands:
+  show-examples    Copy demo files to ./demos/
+  help             Show this help
+
+Example:
+  pbgl show-examples && lua demos/main.lua
+]])
+end

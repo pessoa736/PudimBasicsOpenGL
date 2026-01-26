@@ -30,6 +30,8 @@ Add `library/` to your `lua-language-server` library path for full autocomplete 
 
 Or copy `library/PudimBasicsGl.lua` to your global lua-language-server addons folder.
 
+**Versão em Português (PT-BR):** see `README.pt-br.md`
+
 ## Installation via LuaRocks
 
 ```bash
@@ -180,6 +182,8 @@ Colors can be passed as:
 
 ## Building
 
+### Linux
+
 ```bash
 make
 ```
@@ -191,12 +195,48 @@ make LUA_VERSION=5.4   # Force Lua 5.4
 make LUA_VERSION=5.5   # Force Lua 5.5
 ```
 
+### Windows (MSYS2/MinGW)
+
+1. Install MSYS2 and open the MinGW64 terminal
+2. Install dependencies:
+```bash
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-glfw mingw-w64-x86_64-lua
+```
+3. Build:
+```bash
+make
+```
+
+This creates `PudimBasicsGl.dll`. Use with:
+```lua
+-- Windows
+package.cpath = ".\\?.dll;" .. package.cpath
+local pb = require("PudimBasicsGl")
+```
+
 ## Example Scripts
 
 - `scripts/main.lua` - Basic rendering demo
 - `scripts/texture_demo.lua` - Texture loading and drawing
 - `scripts/window_demo.lua` - VSync and window features
+## Command-line tool (pbgl)
 
+A small CLI named `pbgl` is installed with the rock. It provides two commands:
+
+- `pbgl show-examples` — Copy bundled example scripts to `./demos/` in the current directory
+- `pbgl help` — Show usage information
+
+After running `pbgl show-examples` you'll have a `./demos/` folder; run an example with:
+
+```bash
+lua demos/main.lua
+```
+
+Make sure `~/.luarocks/bin` is in your PATH so you can call `pbgl` directly:
+
+```bash
+export PATH="$HOME/.luarocks/bin:$PATH"
+```
 ## Why No Input/Math?
 
 PudimBasicsGl is intentionally minimal. For input, you can:
