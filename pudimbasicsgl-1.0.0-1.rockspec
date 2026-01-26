@@ -2,7 +2,7 @@ package = "PudimBasicsGl"
 version = "1.0.0-1"
 
 source = {
-    url = "https://github.com/pessoa736/PudimBasicsOpenGL.git",
+    url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-1.tar.gz",
     tag = "v1.0.0-1"
 }
 
