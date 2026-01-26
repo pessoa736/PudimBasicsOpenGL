@@ -1,4 +1,4 @@
-# PudimBasicsGl - Pudim OpenGL Basics
+# PudimBasicsGl - Pudim Basics OpenGL 
 
 A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, and **time**. Input handling and math utilities are left to the developer's choice.
 
