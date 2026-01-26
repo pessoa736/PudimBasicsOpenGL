@@ -2,6 +2,8 @@
 
 A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, and **time**. Input handling and math utilities are left to the developer's choice.
 
+[Versão em Português (PT-BR)](README.pt-br.md)
+
 ## Features
 
 - **Window**: Create and manage OpenGL windows with VSync, fullscreen, and resize support
@@ -30,7 +32,7 @@ Add `library/` to your `lua-language-server` library path for full autocomplete 
 
 Or copy `library/PudimBasicsGl.lua` to your global lua-language-server addons folder.
 
-**Versão em Português (PT-BR):** see `README.pt-br.md`
+
 
 ## Installation via LuaRocks
 
