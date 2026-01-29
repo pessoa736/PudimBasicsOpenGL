@@ -244,9 +244,16 @@ static const luaL_Reg window_meta[] = {
 void lua_register_window_api(lua_State* L) {
     // Create metatable for Window userdata
     luaL_newmetatable(L, WINDOW_METATABLE);
+    // Set basic metamethods (__gc)
     luaL_setfuncs(L, window_meta, 0);
-    lua_pop(L, 1);
-    
+
+    // Create methods table and set it as __index for object:method() calls
+    lua_newtable(L);
+    luaL_setfuncs(L, window_funcs, 0);         // push methods table
+    lua_setfield(L, -2, "__index");           // metatable.__index = methods (pops methods)
+
+    lua_pop(L, 1); // pop metatable
+
     // Get or create PudimBasicsGl table
     lua_getglobal(L, "PudimBasicsGl");
     if (lua_isnil(L, -1)) {
@@ -255,11 +262,11 @@ void lua_register_window_api(lua_State* L) {
         lua_setglobal(L, "PudimBasicsGl");
         lua_getglobal(L, "PudimBasicsGl");
     }
-    
-    // Create window subtable
+
+    // Create window subtable (module-level functions)
     lua_newtable(L);
     luaL_setfuncs(L, window_funcs, 0);
     lua_setfield(L, -2, "window");
-    
+
     lua_pop(L, 1);
 }

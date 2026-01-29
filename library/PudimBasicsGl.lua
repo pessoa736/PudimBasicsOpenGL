@@ -1,3 +1,5 @@
+---@diagnostic disable: duplicate-doc-alias, duplicate-doc-field, duplicate-doc-param
+
 ---@meta PudimBasicsGl
 --- PudimBasicsGl - Pudim OpenGL Basics
 --- A simple 2D graphics library for Lua using OpenGL
