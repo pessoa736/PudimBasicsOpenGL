@@ -57,8 +57,11 @@
     
     pudim.time
     ----------
-    pudim.time.get()                     -> number (seconds since start)
-    pudim.time.delta()                   -> number (seconds since last frame)
+-- Examples:
+-- local t1 = pudim.time.get()
+-- local t2 = pudim.time:get()          -- method-style call
+-- pudim.time.update()
+-- pudim.time:update()                 -- method-style call
     pudim.time.fps()                     -> number (current FPS)
     pudim.time.sleep(seconds)            -- Pause execution
     

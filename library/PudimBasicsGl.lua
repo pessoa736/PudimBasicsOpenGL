@@ -22,7 +22,11 @@ PudimBasicsGl.window = {}
 
 ---@class Window
 ---Opaque window handle (userdata)
-
+---
+---Note: All `PudimBasicsGl.window.*` functions that take a `Window` as the first
+---parameter also support method-style calls on the userdata (e.g. `window:should_close()`),
+---in addition to `PudimBasicsGl.window.should_close(window)`.
+---
 ---Create a new window
 ---@param width integer Window width in pixels
 ---@param height integer Window height in pixels
@@ -324,12 +328,16 @@ PudimBasicsGl.texture = {}
 ---@field destroy fun(self: Texture) Destroy texture and free resources
 
 ---Load a texture from file (PNG, JPG, BMP, TGA, etc.)
+---Also available as method: `pb.texture:load(filepath)`
+---@overload fun(self: PudimBasicsGl.texture, filepath: string): Texture?
 ---@param filepath string Path to the image file
 ---@return Texture? texture The loaded texture, or nil on failure
 ---@return string? error Error message if loading failed
 function PudimBasicsGl.texture.load(filepath) end
 
 ---Create an empty texture with optional RGBA data
+---Also available as method: `pb.texture:create(width, height, data)`
+---@overload fun(self: PudimBasicsGl.texture, width: integer, height: integer, data?: table): Texture?
 ---@param width integer Texture width in pixels
 ---@param height integer Texture height in pixels
 ---@param data? table Optional array of RGBA bytes (width * height * 4 values)
@@ -346,6 +354,9 @@ function PudimBasicsGl.texture.flush() end
 
 ---@class PudimBasicsGl.time
 PudimBasicsGl.time = {}
+
+---Note: All `PudimBasicsGl.time.*` functions accept method-style calls (e.g. `pb.time:get()`),
+---in addition to the module-style `pb.time.get()`.
 
 ---Get total time since the library was initialized
 ---@return number time Time in seconds
