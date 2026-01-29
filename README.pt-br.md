@@ -20,6 +20,8 @@ make
 
 Isso cria `PudimBasicsGl.so`, um módulo Lua que você pode carregar com `require("PudimBasicsGl")`.
 
+> Nota: em versões antigas era necessário iniciar o intérprete com `LD_PRELOAD=/usr/lib/libglfw.so.3 ./lua init.lua`. A biblioteca agora tenta carregar o `libglfw` automaticamente em tempo de execução quando disponível, então isso não deve ser mais necessário. Se houver problemas em ambientes específicos, consulte a seção de troubleshooting abaixo.
+
 ## Suporte LSP
 
 As definições LSP (arquivo `PudimBasicsGl.lua`) agora são instaladas automaticamente com o pacote e o módulo tenta carregá-las quando disponíveis — isso permite que editores com `lua-language-server` mostrem autocompletar e tipos sem configuração adicional. Se preferir usar localmente no workspace, adicione `library/` ao caminho da `lua-language-server`:
@@ -240,6 +242,16 @@ Certifique-se de que `~/.luarocks/bin` está no seu PATH para poder chamar `pbgl
 export PATH="$HOME/.luarocks/bin:$PATH"
 ```
 
+## Troubleshooting ⚠️
+
+- Teste rápido: rode `make test`. O alvo executa `scripts/test_preload.sh`, que tenta criar uma janela 1x1 sem precisar de `LD_PRELOAD`. Em ambientes sem display ele tentará usar `Xvfb` automaticamente.
+- Se o teste falhar, execute manualmente para coletar informações:
+  - `ldd ./PudimBasicsGl.so` — mostra dependências dinâmicas
+  - `ldd /usr/lib/libglfw.so.3` — verifica se o GLFW está instalado e resolvível
+  - Tente executar com `LD_PRELOAD=/usr/lib/libglfw.so.3 lua scripts/main.lua` como fallback (modo de diagnóstico somente).
+- CI: há um workflow de GitHub Actions (`.github/workflows/ci.yml`) que instala dependências em Ubuntu e roda `make test` sob Xvfb; use-o como referência para configurar runners ou debug remoto.
+
+Se você ainda tiver problemas em uma distribuição específica, cole a saída de `make test` e eu ajudo a diagnosticar.
 ## Por que sem Input/Math?
 
 O PudimBasicsGl é propositalmente mínimo. Para input, você pode:

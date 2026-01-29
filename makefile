@@ -91,6 +91,11 @@ install: $(TARGET)
 	@echo "Installing to /usr/local/lib/lua/$(INSTALL_VERSION)/"
 	sudo mkdir -p /usr/local/lib/lua/$(INSTALL_VERSION)
 	sudo cp $(TARGET) /usr/local/lib/lua/$(INSTALL_VERSION)/
+
+.PHONY: test
+test: all
+	@echo "Running preload test script"
+	@bash scripts/test_preload.sh
 endif
 
 .PHONY: all clean install

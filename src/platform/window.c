@@ -3,7 +3,29 @@
 #include <stdlib.h>
 #include <glad/glad.h>
 
+#ifdef __linux__
+#include <dlfcn.h>
+#endif
+
 static int vsync_enabled = 1;
+
+#ifdef __linux__
+// Try to dlopen the GLFW shared library with RTLD_GLOBAL so symbols are available
+// without requiring the user to set LD_PRELOAD. Keep the handle for the process
+// lifetime so the library is not unloaded.
+static void* glfw_preload_handle = NULL;
+static void try_preload_glfw(void) {
+    if (glfw_preload_handle) return;
+    const char* names[] = {"libglfw.so.3", "libglfw.so", NULL};
+    for (int i = 0; names[i]; ++i) {
+        void* h = dlopen(names[i], RTLD_NOW | RTLD_GLOBAL);
+        if (h) {
+            glfw_preload_handle = h;
+            break;
+        }
+    }
+}
+#endif
 
 // Internal resize callback that updates Window struct and calls user callback
 static void framebuffer_size_callback(GLFWwindow* glfw_window, int width, int height) {
@@ -32,7 +54,12 @@ Window* window_create(int width, int height, const char* title) {
     }
     
     glfwSetErrorCallback(error_callback);
-    
+
+#ifdef __linux__
+    // Preload GLFW to avoid needing LD_PRELOAD for some environments
+    try_preload_glfw();
+#endif
+
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
         free(window);

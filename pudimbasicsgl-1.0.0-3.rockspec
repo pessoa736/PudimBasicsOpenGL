@@ -1,9 +1,9 @@
 package = "PudimBasicsGl"
-version = "1.0.0-1"
+version = "1.0.0-3"
 
 source = {
-    url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-1.tar.gz",
-    tag = "v1.0.0-1"
+    url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-3.tar.gz",
+    tag = "v1.0.0-3"
 }
 
 description = {
@@ -50,7 +50,7 @@ build = {
         CFLAGS = "$(CFLAGS) -fPIC -I$(LUA_INCDIR)",
         LDFLAGS = "$(LIBFLAG) -L$(LUA_LIBDIR)"
     },
-    copy_directories = { "examples", "library" },
+    copy_directories = { "examples", "library", "lua", "scripts" },
     install = {
         lib = {
             ["PudimBasicsGl"] = "PudimBasicsGl.so"
