@@ -3,7 +3,7 @@ version = "1.0.0-4"
 
 source = {
     url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-4.tar.gz",
-    tag = "v1.0.0-4"
+    dir = "PudimBasicsOpenGL-v1.0.0-4"
 }
 
 description = {
@@ -47,10 +47,9 @@ build = {
     build_target = "all",
     install_target = "",  -- Don't use makefile's install (it uses sudo)
     build_variables = {
-        CFLAGS = "$(CFLAGS) -fPIC -I$(LUA_INCDIR)",
-        LDFLAGS = "$(LIBFLAG) -L$(LUA_LIBDIR)"
+        CFLAGS = "$(CFLAGS) -fPIC -I$(LUA_INCDIR)"
     },
-    copy_directories = { "examples", "library", "lua", "scripts" },
+    copy_directories = { "examples", "library", "scripts" },
     install = {
         lib = {
             ["PudimBasicsGl"] = "PudimBasicsGl.so"
