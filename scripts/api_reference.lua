@@ -95,6 +95,8 @@
 ]]
 
 -- Example: Simple color cycling demo
+-- Note: For a complete OOP-style demo, see `examples/oop_demo.lua` which demonstrates
+-- usage of `window:should_close()`, `texture:draw()` and `time:update()` in a loop.
 local hue = 0
 
 function init()

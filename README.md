@@ -179,6 +179,22 @@ Colors can be passed as:
 - Table: `{r=1.0, g=0.5, b=0.0, a=1.0}`
 - Individual values: `r, g, b, a` (alpha optional, defaults to 1.0)
 
+## Examples
+
+We provide several example scripts in the `examples/` directory. A new OOP-style demo demonstrates the object-style API (method calls via `:`) — it shows `window:should_close()`, `texture:draw()`, `pb.time:update()` and a simple render loop.
+
+Run the demo after building/installing the module locally:
+
+```bash
+# Build/install locally (optional)
+luarocks make --local
+
+# Run example (ensures local .so is in package.cpath)
+lua -e "package.cpath='./?.so;'..package.cpath" examples/oop_demo.lua
+```
+
+You can also inspect `scripts/test_oop.lua` for a minimal non-visual smoke test of the object-style API.
+
 ## Dependencies
 
 - GLFW3
