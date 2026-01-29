@@ -22,7 +22,7 @@ Isso cria `PudimBasicsGl.so`, um módulo Lua que você pode carregar com `requir
 
 ## Suporte LSP
 
-Adicione `library/` ao caminho da `lua-language-server` para autocompletar e checagem de tipos:
+As definições LSP (arquivo `PudimBasicsGl.lua`) agora são instaladas automaticamente com o pacote e o módulo tenta carregá-las quando disponíveis — isso permite que editores com `lua-language-server` mostrem autocompletar e tipos sem configuração adicional. Se preferir usar localmente no workspace, adicione `library/` ao caminho da `lua-language-server`:
 
 ```json
 // .vscode/settings.json
@@ -32,7 +32,6 @@ Adicione `library/` ao caminho da `lua-language-server` para autocompletar e che
 ```
 
 Ou copie `library/PudimBasicsGl.lua` para a pasta de addons global do `lua-language-server`.
-
 
 ## Instalação via LuaRocks
 

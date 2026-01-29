@@ -50,7 +50,7 @@ build = {
         CFLAGS = "$(CFLAGS) -fPIC -I$(LUA_INCDIR)",
         LDFLAGS = "$(LIBFLAG) -L$(LUA_LIBDIR)"
     },
-    copy_directories = { "examples" },
+    copy_directories = { "examples", "library" },
     install = {
         lib = {
             ["PudimBasicsGl"] = "PudimBasicsGl.so"
