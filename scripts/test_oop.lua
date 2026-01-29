@@ -3,11 +3,11 @@
 local pb = require('PudimBasicsGl')
 
 -- Editor hint: annotate a Window variable to get LSP method suggestions
----@type PudimBasicsGl.Window
+---@type Window
 local win
 
 -- Annotate textures for LSP
----@type PudimBasicsGl.Texture
+---@type Texture
 local tex
 
 
