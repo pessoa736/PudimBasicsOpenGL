@@ -4,7 +4,7 @@ version = "1.0.0-5"
 source = {
     url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-5.tar.gz",
     tag = "v1.0.0-5",
-    dir = "PudimBasicsOpenGL-v1.0.0-5"
+    dir = "PudimBasicsOpenGL-1.0.0-5"
 }
 
 description = {
