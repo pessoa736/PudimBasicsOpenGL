@@ -1,7 +1,9 @@
 -- OOP-style demo: window:should_close(), texture:draw(), time:update(), renderer calls
+---@type PudimBasicsGl
 local pb = require('PudimBasicsGl')
 
--- Create window
+-- Create window (annotated for LSP: `win:` will show window methods)
+---@type Window
 local win, err = pb.window.create(800, 600, "OOP Demo")
 if not win then
     print("Failed to create window:", err)
@@ -12,6 +14,7 @@ end
 pb.renderer.init()
 
 -- Create a tiny procedural texture (2x2 RGBA): red, green, blue, yellow
+---@type Texture
 local tex = pb.texture.create(2, 2, {
     255, 0,   0,   255,  -- pixel 1 (red)
     0,   255, 0,   255,  -- pixel 2 (green)

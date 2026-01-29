@@ -1,5 +1,10 @@
 -- Test demonstrating object-style calls
+---@type PudimBasicsGl
 local pb = require('PudimBasicsGl')
+
+-- Editor hint: annotate a Window variable to get LSP method suggestions, e.g. `---@type Window` then `win:` will show methods
+---@type Window
+local win
 
 print('Testing time module as object-style calls')
 print('time.get()', pb.time.get())
