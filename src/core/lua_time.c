@@ -19,6 +19,7 @@ static void ensure_time_init(void) {
 }
 
 // pudim.time.get() -> number (total time since start)
+// Accept optional self when called as pb.time:get()
 static int l_time_get(lua_State* L) {
     ensure_time_init();
     lua_pushnumber(L, glfwGetTime() - g_time_start);
@@ -26,12 +27,14 @@ static int l_time_get(lua_State* L) {
 }
 
 // pudim.time.delta() -> number (time since last frame)
+// Accept optional self when called as pb.time:delta()
 static int l_time_delta(lua_State* L) {
     lua_pushnumber(L, g_delta_time);
     return 1;
 }
 
 // pudim.time.update() - call once per frame to update delta time
+// Accept optional self when called as pb.time:update()
 static int l_time_update(lua_State* L) {
     (void)L;
     ensure_time_init();
@@ -42,6 +45,7 @@ static int l_time_update(lua_State* L) {
 }
 
 // pudim.time.fps() -> number
+// Accept optional self when called as pb.time:fps()
 static int l_time_fps(lua_State* L) {
     if (g_delta_time > 0) {
         lua_pushnumber(L, 1.0 / g_delta_time);
@@ -52,8 +56,11 @@ static int l_time_fps(lua_State* L) {
 }
 
 // pudim.time.sleep(seconds)
+// Accept optional self when called as pb.time:sleep(seconds)
 static int l_time_sleep(lua_State* L) {
-    double seconds = luaL_checknumber(L, 1);
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2; // pb.time:sleep(seconds)
+    double seconds = luaL_checknumber(L, arg);
     double start = glfwGetTime();
     while (glfwGetTime() - start < seconds) {
         // Busy wait (for small delays)

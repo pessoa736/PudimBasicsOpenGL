@@ -23,8 +23,11 @@ static Texture** check_texture(lua_State* L, int index) {
 }
 
 // PudimBasicsGl.texture.load(filepath) -> Texture
+// Accept optional self when called as module:load(filepath)
 static int l_texture_load(lua_State* L) {
-    const char* filepath = luaL_checkstring(L, 1);
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2; // allow pb.texture:load(path)
+    const char* filepath = luaL_checkstring(L, arg);
     
     // Lazy init texture renderer (needs OpenGL context)
     ensure_texture_renderer_init();
@@ -46,9 +49,12 @@ static int l_texture_load(lua_State* L) {
 }
 
 // PudimBasicsGl.texture.create(width, height, data?) -> Texture
+// Accept optional self when called as module:create(width, height, data?)
 static int l_texture_create(lua_State* L) {
-    int width = (int)luaL_checkinteger(L, 1);
-    int height = (int)luaL_checkinteger(L, 2);
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2; // allow pb.texture:create(w,h,...)
+    int width = (int)luaL_checkinteger(L, arg);
+    int height = (int)luaL_checkinteger(L, arg + 1);
     
     // Lazy init texture renderer (needs OpenGL context)
     ensure_texture_renderer_init();
@@ -56,11 +62,11 @@ static int l_texture_create(lua_State* L) {
     unsigned char* data = NULL;
     
     // If data table provided, use it
-    if (lua_istable(L, 3)) {
+    if (lua_istable(L, arg + 2)) {
         int size = width * height * 4;
         data = (unsigned char*)malloc(size);
         for (int i = 0; i < size; i++) {
-            lua_rawgeti(L, 3, i + 1);
+            lua_rawgeti(L, arg + 2, i + 1);
             data[i] = (unsigned char)lua_tointeger(L, -1);
             lua_pop(L, 1);
         }
