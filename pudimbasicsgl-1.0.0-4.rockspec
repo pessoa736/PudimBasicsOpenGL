@@ -1,9 +1,9 @@
 package = "PudimBasicsGl"
-version = "1.0.0-3"
+version = "1.0.0-4"
 
 source = {
-    url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-3.tar.gz",
-    tag = "v1.0.0-3"
+    url = "https://github.com/pessoa736/PudimBasicsOpenGL/archive/refs/tags/v1.0.0-4.tar.gz",
+    tag = "v1.0.0-4"
 }
 
 description = {
