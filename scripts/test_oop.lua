@@ -2,9 +2,14 @@
 ---@type PudimBasicsGl
 local pb = require('PudimBasicsGl')
 
--- Editor hint: annotate a Window variable to get LSP method suggestions, e.g. `---@type Window` then `win:` will show methods
----@type Window
+-- Editor hint: annotate a Window variable to get LSP method suggestions
+---@type PudimBasicsGl.Window
 local win
+
+-- Annotate textures for LSP
+---@type PudimBasicsGl.Texture
+local tex
+
 
 print('Testing time module as object-style calls')
 print('time.get()', pb.time.get())

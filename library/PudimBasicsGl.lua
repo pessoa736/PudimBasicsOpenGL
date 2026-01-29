@@ -336,34 +336,35 @@ function PudimBasicsGl.renderer.get_info() end
 ---@class PudimBasicsGl.texture
 PudimBasicsGl.texture = {}
 
+---@class PudimBasicsGl.Texture
 ---@class Texture
 ---Opaque texture handle (userdata)
----@field draw fun(self: Texture, x: integer, y: integer, width?: integer, height?: integer) Draw texture at position
----@field draw_tinted fun(self: Texture, x: integer, y: integer, width: integer, height: integer, r: number, g: number, b: number, a?: number) Draw texture with color tint
----@field draw_rotated fun(self: Texture, x: integer, y: integer, width: integer, height: integer, angle: number) Draw rotated texture (angle in degrees)
----@field draw_ex fun(self: Texture, x: integer, y: integer, width: integer, height: integer, angle: number, origin_x?: number, origin_y?: number, r?: number, g?: number, b?: number, a?: number) Draw with full options
----@field draw_region fun(self: Texture, x: integer, y: integer, width: integer, height: integer, src_x: integer, src_y: integer, src_width: integer, src_height: integer) Draw a portion of texture (sprite sheet)
----@field draw_region_ex fun(self: Texture, x: integer, y: integer, width: integer, height: integer, src_x: integer, src_y: integer, src_width: integer, src_height: integer, angle?: number, origin_x?: number, origin_y?: number, r?: number, g?: number, b?: number, a?: number) Draw region with full options
----@field get_size fun(self: Texture): integer, integer Get texture dimensions
----@field get_width fun(self: Texture): integer Get texture width
----@field get_height fun(self: Texture): integer Get texture height
----@field destroy fun(self: Texture) Destroy texture and free resources
+---@field draw fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width?: integer, height?: integer) Draw texture at position
+---@field draw_tinted fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width: integer, height: integer, r: number, g: number, b: number, a?: number) Draw texture with color tint
+---@field draw_rotated fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width: integer, height: integer, angle: number) Draw rotated texture (angle in degrees)
+---@field draw_ex fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width: integer, height: integer, angle: number, origin_x?: number, origin_y?: number, r?: number, g?: number, b?: number, a?: number) Draw with full options
+---@field draw_region fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width: integer, height: integer, src_x: integer, src_y: integer, src_width: integer, src_height: integer) Draw a portion of texture (sprite sheet)
+---@field draw_region_ex fun(self: PudimBasicsGl.Texture, x: integer, y: integer, width: integer, height: integer, src_x: integer, src_y: integer, src_width: integer, src_height: integer, angle?: number, origin_x?: number, origin_y?: number, r?: number, g?: number, b?: number, a?: number) Draw region with full options
+---@field get_size fun(self: PudimBasicsGl.Texture): integer, integer Get texture dimensions
+---@field get_width fun(self: PudimBasicsGl.Texture): integer Get texture width
+---@field get_height fun(self: PudimBasicsGl.Texture): integer Get texture height
+---@field destroy fun(self: PudimBasicsGl.Texture) Destroy texture and free resources
 
 ---Load a texture from file (PNG, JPG, BMP, TGA, etc.)
 ---Also available as method: `pb.texture:load(filepath)`
----@overload fun(self: PudimBasicsGl.texture, filepath: string): Texture?
+---@overload fun(self: PudimBasicsGl.texture, filepath: string): PudimBasicsGl.Texture?
 ---@param filepath string Path to the image file
----@return Texture? texture The loaded texture, or nil on failure
+---@return PudimBasicsGl.Texture? texture The loaded texture, or nil on failure
 ---@return string? error Error message if loading failed
 function PudimBasicsGl.texture.load(filepath) end
 
 ---Create an empty texture with optional RGBA data
 ---Also available as method: `pb.texture:create(width, height, data)`
----@overload fun(self: PudimBasicsGl.texture, width: integer, height: integer, data?: table): Texture?
+---@overload fun(self: PudimBasicsGl.texture, width: integer, height: integer, data?: table): PudimBasicsGl.Texture?
 ---@param width integer Texture width in pixels
 ---@param height integer Texture height in pixels
 ---@param data? table Optional array of RGBA bytes (width * height * 4 values)
----@return Texture? texture The created texture, or nil on failure
+---@return PudimBasicsGl.Texture? texture The created texture, or nil on failure
 ---@return string? error Error message if creation failed
 function PudimBasicsGl.texture.create(width, height, data) end
 

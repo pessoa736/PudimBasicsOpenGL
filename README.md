@@ -35,6 +35,24 @@ Add `library/` to your `lua-language-server` library path for full autocomplete 
 
 Or copy `library/PudimBasicsGl.lua` to your global lua-language-server addons folder.
 
+Editor tip: Annotate variables with the qualified types to get method suggestions for instances. For example:
+
+```lua
+---@type PudimBasicsGl
+local pb = require("PudimBasicsGl")
+
+---@type PudimBasicsGl.Window
+local win = pb.window.create(800, 600, "Title")
+
+-- Now `win:` will show methods in VSCode's completion list
+win:swap_buffers()
+
+---@type PudimBasicsGl.Texture
+local tex = pb.texture.load("sprite.png")
+-- `tex:` will show texture methods such as `draw`, `get_size`, etc.
+```
+
+
 
 
 ## Installation via LuaRocks
