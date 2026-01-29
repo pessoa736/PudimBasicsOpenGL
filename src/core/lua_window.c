@@ -125,6 +125,27 @@ static int l_window_get_handle(lua_State* L) {
     return 1;
 }
 
+// __pairs metamethod for Window userdata - iterate method table
+static int l_window_pairs(lua_State* L) {
+    // Push methods table (metatable.__index) and return next, methods, nil
+    luaL_getmetatable(L, WINDOW_METATABLE);   // +1: metatable
+    lua_getfield(L, -1, "__index");         // +1: methods
+    lua_remove(L, -2);                        // remove metatable, stack: methods
+
+    // Push next function first
+    lua_getglobal(L, "next");               // stack: methods, next
+
+    // Duplicate methods table and push nil for initial key
+    lua_pushvalue(L, -2);                     // stack: methods, next, methods
+    lua_pushnil(L);                           // stack: methods, next, methods, nil
+
+    // Remove the original methods at bottom so the stack is: next, methods, nil
+    lua_remove(L, 1);
+
+    // Return iterator, state, initial
+    return 3;
+}
+
 // PudimBasicsGl.window.set_vsync(window, enabled)
 static int l_window_set_vsync(lua_State* L) {
     Window* window = check_window(L, 1);
@@ -251,6 +272,11 @@ void lua_register_window_api(lua_State* L) {
     lua_newtable(L);
     luaL_setfuncs(L, window_funcs, 0);         // push methods table
     lua_setfield(L, -2, "__index");           // metatable.__index = methods (pops methods)
+
+    // Set __pairs metamethod so `pairs(window)` iterates method names
+    lua_pushstring(L, "__pairs");
+    lua_pushcfunction(L, l_window_pairs);
+    lua_settable(L, -3);
 
     lua_pop(L, 1); // pop metatable
 

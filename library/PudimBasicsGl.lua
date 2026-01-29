@@ -23,6 +23,26 @@ PudimBasicsGl.window = {}
 ---@class Window
 ---Opaque window handle (userdata)
 ---
+---Methods (available as `window:method()`):
+---@field should_close fun(self: Window): boolean Check if window should close
+---@field destroy fun(self: Window) Destroy window and free resources
+---@field close fun(self: Window) Signal that the window should close
+---@field swap_buffers fun(self: Window) Swap buffers (present frame)
+---@field get_size fun(self: Window): integer, integer Get window width and height
+---@field set_size fun(self: Window, width: integer, height: integer) Set window size
+---@field set_title fun(self: Window, title: string) Set window title
+---@field get_handle fun(self: Window): userdata Get native GLFW handle
+---@field set_vsync fun(self: Window, enabled: boolean) Enable/disable VSync
+---@field get_vsync fun(self: Window): boolean Check if VSync is enabled
+---@field set_fullscreen fun(self: Window, fullscreen: boolean) Set fullscreen mode
+---@field is_fullscreen fun(self: Window): boolean Check if fullscreen
+---@field toggle_fullscreen fun(self: Window) Toggle fullscreen mode
+---@field get_position fun(self: Window): integer, integer Get window position
+---@field set_position fun(self: Window, x: integer, y: integer) Set window position
+---@field focus fun(self: Window) Focus the window
+---@field is_focused fun(self: Window): boolean Check if window has focus
+---@field set_resizable fun(self: Window, resizable: boolean) Enable/disable resizing
+---
 ---Note: All `PudimBasicsGl.window.*` functions that take a `Window` as the first
 ---parameter also support method-style calls on the userdata (e.g. `window:should_close()`),
 ---in addition to `PudimBasicsGl.window.should_close(window)`.
