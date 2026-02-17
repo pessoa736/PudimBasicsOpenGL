@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas**, **input**, **áudio**, **texto** e **tempo**. Utilitários de matemática ficam a critério do desenvolvedor.
+Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas**, **input**, **áudio**, **texto**, **tempo** e **câmera**.
 
 > [!WARNING]
 > Este projeto está em estado *experimental*. APIs e funcionalidades podem mudar sem aviso — use com cautela.
@@ -14,6 +14,7 @@ Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essenc
 - **Áudio**: Carregamento e reprodução de áudio (WAV, MP3, FLAC) com volume, pitch e looping via [miniaudio](https://github.com/mackron/miniaudio)
 - **Texto**: Carregamento de fontes TrueType (.ttf) e renderização de texto com tamanho, cor e medição personalizáveis via [stb_truetype](https://github.com/nothings/stb)
 - **Tempo**: Delta time, FPS e utilitários de tempo
+- **Câmera**: Controles de câmera 2D (posição, zoom, rotação, look_at e conversão tela/mundo)
 
 ## Compilação
 
@@ -49,7 +50,7 @@ luarocks install pudimbasicsgl
 Ou compile a partir do rockspec local:
 
 ```bash
-luarocks make pudimbasicsgl-1.0.0-13.rockspec
+luarocks make pudimbasicsgl-1.0.0-14.rockspec
 ```
 
 O rockspec usa o build type `builtin` — o LuaRocks compila todos os `.c` diretamente em `.so` (Linux) ou `.dll` (Windows), sem precisar do makefile. O comando `make` só é necessário para desenvolvimento local.
@@ -211,6 +212,11 @@ font:destroy()
 | `color(r, g, b, a)` | Cria uma tabela de cor (floats 0.0-1.0 ou hex) |
 | `color255(r, g, b, a)` | Cria uma tabela de cor a partir de inteiros 0-255 |
 | `color_unpack(color)` | Desempacota Color → r, g, b, a (0.0-1.0) |
+| `set_clear_color(r, g, b, a?)` | Define o estado da cor de limpeza do OpenGL |
+| `enable_depth_test(enabled)` | Habilita/desabilita depth test do OpenGL |
+| `enable_blend(enabled)` | Habilita/desabilita blend alpha |
+| `set_viewport(x, y, width, height)` | Define o viewport do OpenGL |
+| `get_info()` | Retorna tabela com info OpenGL (`version`, `renderer`, `vendor`, `glsl_version`) |
 | `colors.WHITE`, `colors.RED`, etc. | Cores pré-definidas |
 
 ### pb.texture

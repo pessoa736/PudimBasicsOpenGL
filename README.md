@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, **text**, and **time**. Math utilities are left to the developer's choice.
+A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, **text**, **time**, and **camera**.
 
 > [!WARNING]
 > This project is **experimental**. APIs and features may change without notice — use with caution.
@@ -16,6 +16,7 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 - **Audio**: Load and play audio files (WAV, MP3, FLAC) with volume, pitch, and looping via [miniaudio](https://github.com/mackron/miniaudio)
 - **Text**: Load TrueType fonts (.ttf) and render text with customizable size, color, and measurement via [stb_truetype](https://github.com/nothings/stb)
 - **Time**: Delta time, FPS, and timing utilities
+- **Camera**: 2D camera controls (position, zoom, rotation, look_at, screen/world conversion)
 
 ## Building
 
@@ -77,7 +78,7 @@ luarocks install pudimbasicsgl
 Or build from the local rockspec:
 
 ```bash
-luarocks make pudimbasicsgl-1.0.0-13.rockspec
+luarocks make pudimbasicsgl-1.0.0-14.rockspec
 ```
 
 The rockspec uses the `builtin` build type — LuaRocks compiles all `.c` sources directly into `.so` (Linux) or `.dll` (Windows), no makefile needed. The `make` command is only required for local development.
@@ -239,6 +240,11 @@ font:destroy()
 | `color(r, g, b, a)` | Create a color table (0.0-1.0 floats or hex) |
 | `color255(r, g, b, a)` | Create a color table from 0-255 integers |
 | `color_unpack(color)` | Unpack Color table → r, g, b, a (0.0-1.0) |
+| `set_clear_color(r, g, b, a?)` | Set OpenGL clear color state |
+| `enable_depth_test(enabled)` | Enable/disable OpenGL depth testing |
+| `enable_blend(enabled)` | Enable/disable alpha blending |
+| `set_viewport(x, y, width, height)` | Set the OpenGL viewport |
+| `get_info()` | Get OpenGL info table (`version`, `renderer`, `vendor`, `glsl_version`) |
 | `colors.WHITE`, `colors.RED`, etc. | Predefined colors |
 
 ### pb.texture
