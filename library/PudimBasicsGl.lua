@@ -13,6 +13,7 @@
 ---@field texture PudimBasicsGl.texture Texture loading and rendering module
 ---@field input PudimBasicsGl.input Keyboard and mouse input module
 ---@field audio PudimBasicsGl.audio Audio loading and playback module
+---@field text PudimBasicsGl.text Text rendering and font module
 local PudimBasicsGl = {}
 
 --------------------------------------------------------------------------------
@@ -301,6 +302,30 @@ function PudimBasicsGl.renderer.set_line_width(width) end
 ---@return Color color The color table
 function PudimBasicsGl.renderer.color(r, g, b, a) end
 
+---Create a color table from integer values (0-255)
+---@param r integer Red component (0-255)
+---@param g integer Green component (0-255)
+---@param b integer Blue component (0-255)
+---@param a integer? Alpha component (0-255), defaults to 255
+---@return Color color The color table (converted to 0.0-1.0)
+function PudimBasicsGl.renderer.color255(r, g, b, a) end
+
+---Unpack a Color table into individual float values (0.0-1.0)
+---@param color Color The color table to unpack
+---@return number r Red component (0.0-1.0)
+---@return number g Green component (0.0-1.0)
+---@return number b Blue component (0.0-1.0)
+---@return number a Alpha component (0.0-1.0)
+function PudimBasicsGl.renderer.color_unpack(color) end
+
+---Unpack a Color table into individual integer values (0-255)
+---@param color Color The color table to unpack
+---@return integer r Red component (0-255)
+---@return integer g Green component (0-255)
+---@return integer b Blue component (0-255)
+---@return integer a Alpha component (0-255)
+function PudimBasicsGl.renderer.color255_unpack(color) end
+
 ---Set the clear color (used by clear())
 ---@param r number Red component (0.0-1.0)
 ---@param g number Green component (0.0-1.0)
@@ -556,5 +581,34 @@ function PudimBasicsGl.audio.get_master_volume() end
 
 ---Shutdown the audio engine and release all resources
 function PudimBasicsGl.audio.shutdown() end
+
+--------------------------------------------------------------------------------
+-- Text Module
+--------------------------------------------------------------------------------
+
+---@class Font
+---Opaque font handle (userdata). Loaded via `pb.text.load()`.
+---Automatically freed by garbage collection, or manually via `:destroy()`.
+---@field draw fun(self: Font, text: string, x: number, y: number, r: number|Color, g?: number, b?: number, a?: number) Draw text at position with color
+---@field measure fun(self: Font, text: string): number, number Measure text width and height
+---@field set_size fun(self: Font, size: number) Change font size (re-rasterizes atlas)
+---@field get_size fun(self: Font): number Get current font size in pixels
+---@field get_line_height fun(self: Font): number Get line height in pixels
+---@field destroy fun(self: Font) Destroy font and free resources
+
+---@class PudimBasicsGl.text
+PudimBasicsGl.text = {}
+
+---Load a TrueType font file (.ttf) at a given pixel size
+---Also available as method: `pb.text:load(filepath, size)`
+---@overload fun(self: PudimBasicsGl.text, filepath: string, size?: number): Font?, string?
+---@param filepath string Path to the .ttf font file
+---@param size? number Font size in pixels (default: 24)
+---@return Font? font The loaded font, or nil on failure
+---@return string? error Error message if loading failed
+function PudimBasicsGl.text.load(filepath, size) end
+
+---Flush pending text draws to the screen
+function PudimBasicsGl.text.flush() end
 
 return PudimBasicsGl

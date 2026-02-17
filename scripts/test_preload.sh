@@ -208,8 +208,117 @@ printf "%s\n" "$AUDIO_OUTPUT"
 
 if printf "%s\n" "$AUDIO_OUTPUT" | grep -q "AUDIO_OK"; then
     echo "Audio module tests passed"
-    exit 0
 else
     echo "Audio module tests failed!" >&2
     exit 6
+fi
+
+echo ""
+echo "Running text module tests..."
+TEXT_OUTPUT=$(lua -e '
+package.cpath = "./?.so;" .. package.cpath
+local pb = require("PudimBasicsGl")
+local w = pb.window.create(1, 1, "text_test")
+if not w then print("TEXT_FAIL:window"); os.exit(2) end
+
+local pass = 0
+local fail = 0
+
+local function check(name, cond)
+    if cond then
+        pass = pass + 1
+        print("  OK: " .. name)
+    else
+        fail = fail + 1
+        print("  FAIL: " .. name)
+    end
+end
+
+-- text subtable must exist
+check("text table exists", pb.text ~= nil)
+check("text.load is a function", type(pb.text.load) == "function")
+check("text.flush is a function", type(pb.text.flush) == "function")
+
+-- loading a non-existent font should return nil
+local bad, err = pb.text.load("non_existent_font.ttf")
+check("load non-existent returns nil", bad == nil)
+check("load non-existent returns error msg", type(err) == "string")
+
+-- Try to load a system font for deeper testing
+local font_paths = {
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+}
+local font = nil
+for _, fp in ipairs(font_paths) do
+    font = pb.text.load(fp, 24)
+    if font then break end
+end
+
+if font then
+    check("font loaded", true)
+    check("font is userdata", type(font) == "userdata")
+
+    -- get_size
+    local sz = font:get_size()
+    check("get_size returns number", type(sz) == "number")
+    check("get_size == 24", math.abs(sz - 24) < 0.01)
+
+    -- get_line_height
+    local lh = font:get_line_height()
+    check("get_line_height returns number", type(lh) == "number")
+    check("line_height > 0", lh > 0)
+
+    -- measure
+    local tw, th = font:measure("Hello")
+    check("measure returns width", type(tw) == "number" and tw > 0)
+    check("measure returns height", type(th) == "number" and th > 0)
+
+    -- empty string measure
+    local ew, eh = font:measure("")
+    check("empty measure width == 0", ew == 0)
+
+    -- set_size
+    local ok_ss = pcall(font.set_size, font, 32)
+    check("set_size runs", ok_ss)
+    local new_sz = font:get_size()
+    check("new size == 32", math.abs(new_sz - 32) < 0.01)
+
+    -- draw should not error (needs renderer begin)
+    pb.renderer.init()
+    pb.renderer.begin(1, 1)
+    pb.renderer.flush()
+    local ok_draw = pcall(font.draw, font, "Test", 0, 0, 1, 1, 1)
+    check("draw runs", ok_draw)
+    pb.text.flush()
+    pb.renderer.finish()
+
+    -- destroy
+    font:destroy()
+    check("destroy runs", true)
+
+    -- methods on destroyed font should error
+    local ok_dead = pcall(font.get_size, font)
+    check("dead font errors", not ok_dead)
+else
+    print("  SKIP: no system font found for deeper tests")
+end
+
+pb.window.destroy(w)
+
+print(string.format("TEXT_RESULT: %d passed, %d failed", pass, fail))
+if fail > 0 then os.exit(7) end
+print("TEXT_OK")
+' 2>&1 || true)
+
+printf "%s\n" "$TEXT_OUTPUT"
+
+if printf "%s\n" "$TEXT_OUTPUT" | grep -q "TEXT_OK"; then
+    echo "Text module tests passed"
+    exit 0
+else
+    echo "Text module tests failed!" >&2
+    exit 7
 fi

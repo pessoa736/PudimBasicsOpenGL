@@ -63,6 +63,8 @@ SRC = src/main.c \
       src/core/lua_texture.c \
       src/core/lua_input.c \
       src/core/lua_audio.c \
+      src/core/lua_text.c \
+      src/render/text.c \
       external/glad/src/glad.c
 
 INCLUDES = -Iexternal/glad/include -Iexternal -Isrc $(LUA_CFLAGS)

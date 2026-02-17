@@ -7,6 +7,9 @@
 // External function from texture.c
 extern void texture_renderer_set_screen_size(int width, int height);
 
+// External function from text.c
+extern void text_renderer_set_screen_size(int width, int height);
+
 // Shader sources
 static const char* vertex_shader_src = 
     "#version 330 core\n"
@@ -163,6 +166,9 @@ void renderer_begin(int screen_width, int screen_height) {
     
     // Update texture renderer screen size too
     texture_renderer_set_screen_size(screen_width, screen_height);
+    
+    // Update text renderer screen size too
+    text_renderer_set_screen_size(screen_width, screen_height);
     
     // Create orthographic projection matrix (2D)
     float left = 0.0f;

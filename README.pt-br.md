@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas**, **input**, **áudio** e **tempo**. Utilitários de matemática ficam a critério do desenvolvedor.
+Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essencial: **gestão de janelas**, **renderização 2D**, **texturas**, **input**, **áudio**, **texto** e **tempo**. Utilitários de matemática ficam a critério do desenvolvedor.
 
 > [!WARNING]
 > Este projeto está em estado *experimental*. APIs e funcionalidades podem mudar sem aviso — use com cautela.
@@ -12,6 +12,7 @@ Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essenc
 - **Texturas**: Carregamento de imagens (PNG, JPG, BMP, etc.) e renderização com rotação, tint e suporte a sprites
 - **Input**: Entrada de teclado e mouse (estado de teclas, posição do mouse, controle de cursor)
 - **Áudio**: Carregamento e reprodução de áudio (WAV, MP3, FLAC) com volume, pitch e looping via [miniaudio](https://github.com/mackron/miniaudio)
+- **Texto**: Carregamento de fontes TrueType (.ttf) e renderização de texto com tamanho, cor e medição personalizáveis via [stb_truetype](https://github.com/nothings/stb)
 - **Tempo**: Delta time, FPS e utilitários de tempo
 
 ## Compilação
@@ -127,6 +128,30 @@ pb.audio.set_master_volume(0.5)
 pb.audio.shutdown()
 ```
 
+### Exemplo de Texto
+
+```lua
+-- Carrega uma fonte TrueType a 32px
+local font = pb.text.load("minha_fonte.ttf", 32)
+
+-- Desenha texto (flush primitivas antes, shader diferente)
+pb.renderer.flush()
+font:draw("Olá, Mundo!", 100, 100, 1, 1, 1) -- texto branco
+font:draw("Colorido!", 100, 150, {r=1, g=0.5, b=0, a=1}) -- texto laranja
+
+-- Mede dimensões do texto
+local w, h = font:measure("Olá, Mundo!")
+
+-- Altera tamanho da fonte dinamicamente
+font:set_size(48)
+
+-- Flush texto antes de desenhar primitivas novamente
+pb.text.flush()
+
+-- Limpeza
+font:destroy()
+```
+
 ## Referência de API
 
 ### pb.window
@@ -173,7 +198,10 @@ pb.audio.shutdown()
 | `triangle_filled(...)` | Desenha triângulo preenchido |
 | `set_point_size(size)` | Define tamanho de pontos |
 | `set_line_width(width)` | Define largura de linhas |
-| `color(r, g, b, a)` | Cria uma tabela de cor |
+| `color(r, g, b, a)` | Cria uma tabela de cor (floats 0.0-1.0 ou hex) |
+| `color255(r, g, b, a)` | Cria uma tabela de cor a partir de inteiros 0-255 |
+| `color_unpack(color)` | Desempacota Color → r, g, b, a (0.0-1.0) |
+| `color255_unpack(color)` | Desempacota Color → r, g, b, a (0-255) |
 | `colors.WHITE`, `colors.RED`, etc. | Cores pré-definidas |
 
 ### pb.texture
@@ -243,6 +271,27 @@ pb.audio.shutdown()
 | `sound:set_pitch(pitch)` | Define pitch (1.0 = normal, 0.5 = lento, 2.0 = rápido) |
 | `sound:get_pitch()` | Retorna pitch atual |
 | `sound:destroy()` | Libera recursos do som |
+
+### pb.text
+
+| Função | Descrição |
+|--------|-----------|
+| `load(filepath, size?)` | Carrega fonte TrueType (.ttf) no tamanho em pixels (padrão 24), retorna Font |
+| `flush()` | Faz flush de desenhos de texto pendentes |
+
+#### Métodos da Font
+
+| Método | Descrição |
+|--------|-----------|
+| `font:draw(text, x, y, color)` | Desenha texto na posição com cor |
+| `font:measure(text)` | Retorna largura e altura do texto sem desenhar |
+| `font:set_size(size)` | Altera tamanho da fonte (re-rasteriza atlas) |
+| `font:get_size()` | Retorna tamanho atual da fonte em pixels |
+| `font:get_line_height()` | Retorna altura da linha em pixels |
+| `font:destroy()` | Libera recursos da fonte |
+
+> **Nota:** Chame `pb.renderer.flush()` antes de desenhar texto, e `pb.text.flush()` antes de desenhar primitivas — eles usam shaders diferentes.
+
 ### pb.time
 
 | Função | Descrição |
@@ -308,6 +357,7 @@ local pb = require("PudimBasicsGl")
 - `examples/input_demo.lua` - Demo de input de teclado e mouse
 - `examples/audio_demo.lua` - Demo de carregamento e reprodução de áudio
 - `examples/oop_demo.lua` - Demo com estilo orientado a objetos
+- `examples/text_demo.lua` - Demo de renderização de texto e carregamento de fontes
 - `examples/api_reference.lua` - Exemplo completo de referência da API
 
 ## Ferramenta de linha de comando (pbgl)
@@ -344,6 +394,7 @@ Se você ainda tiver problemas em uma distribuição específica, cole a saída 
 - Arquivo de áudio de exemplo (`examples/example.mp3`) do [file-examples.com](https://file-examples.com/index.php/sample-audio-files/sample-mp3-download/) — usado apenas para testes/demonstração.
 - [miniaudio](https://github.com/mackron/miniaudio) — biblioteca de áudio single-header por David Reid (domínio público / MIT-0).
 - [stb_image](https://github.com/nothings/stb) — carregador de imagens single-header por Sean Barrett (domínio público / MIT).
+- [stb_truetype](https://github.com/nothings/stb) — rasterizador de fontes TrueType single-header por Sean Barrett (domínio público / MIT).
 - [GLAD](https://glad.dav1d.de/) — gerador de loader OpenGL.
 
 ## Licença

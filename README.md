@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, and **time**. Math utilities are left to the developer's choice.
+A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, **text**, and **time**. Math utilities are left to the developer's choice.
 
 > [!WARNING]
 > This project is **experimental**. APIs and features may change without notice — use with caution.
@@ -14,6 +14,7 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 - **Textures**: Load images (PNG, JPG, BMP, etc.) and draw them with rotation, tinting, and sprite sheet support
 - **Input**: Keyboard and mouse input (key state, mouse position, cursor control)
 - **Audio**: Load and play audio files (WAV, MP3, FLAC) with volume, pitch, and looping via [miniaudio](https://github.com/mackron/miniaudio)
+- **Text**: Load TrueType fonts (.ttf) and render text with customizable size, color, and measurement via [stb_truetype](https://github.com/nothings/stb)
 - **Time**: Delta time, FPS, and timing utilities
 
 ## Building
@@ -56,6 +57,10 @@ local tex = pb.texture.load("sprite.png")
 ---@type Sound
 local snd = pb.audio.load("music.mp3")
 -- `snd:` will show audio methods such as `play`, `stop`, `set_volume`, etc.
+
+---@type Font
+local font = pb.text.load("my_font.ttf", 32)
+-- `font:` will show text methods such as `draw`, `measure`, `set_size`, etc.
 ```
 
 
@@ -151,6 +156,30 @@ pb.audio.set_master_volume(0.5)
 pb.audio.shutdown()
 ```
 
+### Text Example
+
+```lua
+-- Load a TrueType font at 32px
+local font = pb.text.load("my_font.ttf", 32)
+
+-- Draw text (flush primitives first, different shader)
+pb.renderer.flush()
+font:draw("Hello, World!", 100, 100, 1, 1, 1) -- white text
+font:draw("Colored!", 100, 150, {r=1, g=0.5, b=0, a=1}) -- orange text
+
+-- Measure text dimensions
+local w, h = font:measure("Hello, World!")
+
+-- Change font size dynamically
+font:set_size(48)
+
+-- Flush text before drawing primitives again
+pb.text.flush()
+
+-- Cleanup
+font:destroy()
+```
+
 ## API Reference
 
 ### pb.window
@@ -197,7 +226,10 @@ pb.audio.shutdown()
 | `triangle_filled(...)` | Draw filled triangle |
 | `set_point_size(size)` | Set point rendering size |
 | `set_line_width(width)` | Set line rendering width |
-| `color(r, g, b, a)` | Create a color table |
+| `color(r, g, b, a)` | Create a color table (0.0-1.0 floats or hex) |
+| `color255(r, g, b, a)` | Create a color table from 0-255 integers |
+| `color_unpack(color)` | Unpack Color table → r, g, b, a (0.0-1.0) |
+| `color255_unpack(color)` | Unpack Color table → r, g, b, a (0-255) |
 | `colors.WHITE`, `colors.RED`, etc. | Predefined colors |
 
 ### pb.texture
@@ -268,6 +300,26 @@ pb.audio.shutdown()
 | `sound:set_pitch(pitch)` | Set pitch (1.0 = normal, 0.5 = slow, 2.0 = fast) |
 | `sound:get_pitch()` | Get current pitch |
 | `sound:destroy()` | Free sound resources |
+
+### pb.text
+
+| Function | Description |
+|----------|-------------|
+| `load(filepath, size?)` | Load a TrueType font (.ttf) at pixel size (default 24), returns Font |
+| `flush()` | Flush pending text draws |
+
+#### Font Methods
+
+| Method | Description |
+|--------|-------------|
+| `font:draw(text, x, y, color)` | Draw text at position with color |
+| `font:measure(text)` | Get text width and height without drawing |
+| `font:set_size(size)` | Change font size (re-rasterizes atlas) |
+| `font:get_size()` | Get current font size in pixels |
+| `font:get_line_height()` | Get line height in pixels |
+| `font:destroy()` | Free font resources |
+
+> **Note:** Call `pb.renderer.flush()` before drawing text, and `pb.text.flush()` before drawing primitives — they use different shaders.
 
 ### pb.time
 
@@ -350,6 +402,7 @@ local pb = require("PudimBasicsGl")
 - `examples/input_demo.lua` - Keyboard and mouse input demo
 - `examples/audio_demo.lua` - Audio loading and playback demo
 - `examples/oop_demo.lua` - Object-oriented style API demo
+- `examples/text_demo.lua` - Text rendering and font loading demo
 - `examples/api_reference.lua` - Complete API reference example
 ## Command-line tool (pbgl)
 
@@ -374,6 +427,7 @@ export PATH="$HOME/.luarocks/bin:$PATH"
 - Sample audio file (`examples/example.mp3`) from [file-examples.com](https://file-examples.com/index.php/sample-audio-files/sample-mp3-download/) — used for testing/demo purposes only.
 - [miniaudio](https://github.com/mackron/miniaudio) — single-header audio library by David Reid (public domain / MIT-0).
 - [stb_image](https://github.com/nothings/stb) — single-header image loader by Sean Barrett (public domain / MIT).
+- [stb_truetype](https://github.com/nothings/stb) — single-header TrueType font rasterizer by Sean Barrett (public domain / MIT).
 - [GLAD](https://glad.dav1d.de/) — OpenGL loader generator.
 
 ## License
