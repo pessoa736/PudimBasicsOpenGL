@@ -24,6 +24,7 @@ src/
 │   ├── lua_input.c         # pb.input.* — Stateless key/mouse queries + constants
 │   ├── lua_time.c          # pb.time.* — Stateless timing functions
 │   ├── lua_audio.c         # pb.audio.* — Sound userdata + metatable
+│   ├── lua_text.c          # pb.text.* — Font userdata + metatable
 │   └── lua_math.c          # pb.math.* — Utility math functions
 ├── platform/
 │   ├── window.h            # C API header for window management
@@ -32,7 +33,9 @@ src/
 │   ├── renderer.h          # C API header for 2D primitives
 │   ├── renderer.c          # OpenGL batched primitive renderer
 │   ├── texture.h           # C API header for textures
-│   └── texture.c           # OpenGL texture loading/rendering (stb_image)
+│   ├── texture.c           # OpenGL texture loading/rendering (stb_image)
+│   ├── text.h              # C API header for text rendering
+│   └── text.c              # TrueType text rendering (stb_truetype)
 └── audio/
     ├── audio.h             # C API header for audio
     └── audio.c             # miniaudio implementation
@@ -40,7 +43,7 @@ src/
 external/                   # Third-party single-header libraries (vendored)
 ├── glad/                   # OpenGL loader (glad)
 ├── miniaudio/              # Audio engine (miniaudio.h)
-└── stb/                    # Image loading (stb_image.h)
+└── stb/                    # Image loading (stb_image.h), font rasterization (stb_truetype.h)
 
 library/
 └── PudimBasicsGl.lua       # LuaLS (@meta) type definitions for LSP support
@@ -50,7 +53,7 @@ scripts/                    # Test scripts (bash)
 bin/
 └── pbgl                    # CLI tool (Lua script)
 
-makefile                    # Build system
+makefile                    # Build system (for local development)
 ```
 
 ---
@@ -77,6 +80,7 @@ luaopen_PudimBasicsGl(L)
   → lua_register_texture_api(L)        // Creates PudimBasicsGl.texture
   → lua_register_input_api(L)          // Creates PudimBasicsGl.input
   → lua_register_audio_api(L)          // Creates PudimBasicsGl.audio
+  → lua_register_text_api(L)           // Creates PudimBasicsGl.text
   → return 1                           // Return the table
 ```
 
@@ -232,7 +236,7 @@ static void ensure_init(void) {
 
 ## Build System
 
-### Building
+### Building (local development)
 
 ```bash
 make            # Build PudimBasicsGl.so (or .dll on Windows)
@@ -240,6 +244,8 @@ make clean      # Remove built artifacts
 make install    # Install to /usr/local/lib/lua/5.x/ (Linux, requires sudo)
 make test       # Build + run test suite
 ```
+
+The `makefile` is used for **local development only**. For distribution, the project uses LuaRocks with `type = "builtin"` (see LuaRocks section below).
 
 ### Makefile Key Variables
 
@@ -402,13 +408,22 @@ extern void lua_register_physics_api(lua_State* L);
 lua_register_physics_api(L);  // inside luaopen_PudimBasicsGl()
 ```
 
-#### 4. Add sources to `makefile`
+#### 4. Add sources to `makefile` and rockspec
 
-Add to the `SRC` variable:
+Add to the `SRC` variable in the makefile:
 ```makefile
 SRC = ... \
       src/physics/physics.c \
       src/core/lua_physics.c
+```
+
+Add to the `sources` list in the rockspec (`build.modules.PudimBasicsGl.sources`):
+```lua
+sources = {
+    -- ... existing sources ...
+    "src/physics/physics.c",
+    "src/core/lua_physics.c",
+},
 ```
 
 #### 5. Add LSP type definitions in `library/PudimBasicsGl.lua`
@@ -476,6 +491,7 @@ Create `examples/physics_demo.lua` following the pattern from existing examples.
 - [ ] `src/core/lua_module.c` — Lua binding
 - [ ] `src/main.c` — Add `extern` and call `lua_register_*_api(L)`
 - [ ] `makefile` — Add `.c` files to `SRC`
+- [ ] Rockspec — Add `.c` files to `build.modules.PudimBasicsGl.sources`
 - [ ] `library/PudimBasicsGl.lua` — Add `@class` and `@field` annotations
 - [ ] `scripts/test_preload.sh` — Add test section
 - [ ] `examples/module_demo.lua` — Example script (optional)
@@ -499,8 +515,26 @@ Key conventions:
 
 ## LuaRocks Distribution
 
-The project publishes to LuaRocks via `.rockspec` files. The rockspec uses `type = "make"` build and installs:
-- The shared library to `lib` (as `PudimBasicsGl`)
+The project publishes to LuaRocks via `.rockspec` files. The rockspec uses `type = "builtin"` — LuaRocks compiles all `.c` sources directly into `.so` (Linux) or `.dll` (Windows), without requiring the makefile.
+
+The `builtin` build type lists all source files, include directories, and libraries in the rockspec itself:
+
+```lua
+build = {
+    type = "builtin",
+    modules = {
+        PudimBasicsGl = {
+            sources = { "src/main.c", "src/platform/window.c", ... },
+            incdirs = { "external/glad/include", "external", "src", "$(GLFW_INCDIR)" },
+            libraries = { "glfw", "GL", "m", "dl", "pthread" },
+        }
+    },
+}
+```
+
+Platform-specific overrides (e.g., Windows libraries) use the `platforms` sub-table inside `build` and `external_dependencies` for deep merge (requires `rockspec_format = "3.0"`).
+
+The rockspec also installs:
 - The CLI tool `bin/pbgl`
 - Directories: `examples/`, `library/`, `scripts/`
 

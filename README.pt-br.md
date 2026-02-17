@@ -17,6 +17,8 @@ Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essenc
 
 ## Compilação
 
+A forma recomendada de instalar é via LuaRocks (veja abaixo). Para desenvolvimento local:
+
 ```bash
 make
 ```
@@ -41,8 +43,16 @@ Ou copie `library/PudimBasicsGl.lua` para a pasta de addons global do `lua-langu
 ## Instalação via LuaRocks
 
 ```bash
-luarocks make PudimBasicsGl-1.0.0-1.rockspec
+luarocks install pudimbasicsgl
 ```
+
+Ou compile a partir do rockspec local:
+
+```bash
+luarocks make pudimbasicsgl-1.0.0-13.rockspec
+```
+
+O rockspec usa o build type `builtin` — o LuaRocks compila todos os `.c` diretamente em `.so` (Linux) ou `.dll` (Windows), sem precisar do makefile. O comando `make` só é necessário para desenvolvimento local.
 
 ## Uso
 

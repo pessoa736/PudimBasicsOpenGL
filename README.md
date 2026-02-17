@@ -19,6 +19,8 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 
 ## Building
 
+The recommended way to install is via LuaRocks (see below). For local development:
+
 ```bash
 make
 ```
@@ -69,8 +71,16 @@ local font = pb.text.load("my_font.ttf", 32)
 ## Installation via LuaRocks
 
 ```bash
-luarocks make PudimBasicsGl-1.0.0-1.rockspec
+luarocks install pudimbasicsgl
 ```
+
+Or build from the local rockspec:
+
+```bash
+luarocks make pudimbasicsgl-1.0.0-13.rockspec
+```
+
+The rockspec uses the `builtin` build type — LuaRocks compiles all `.c` sources directly into `.so` (Linux) or `.dll` (Windows), no makefile needed. The `make` command is only required for local development.
 
 ## Usage
 
