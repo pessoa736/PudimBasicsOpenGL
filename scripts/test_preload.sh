@@ -317,8 +317,142 @@ printf "%s\n" "$TEXT_OUTPUT"
 
 if printf "%s\n" "$TEXT_OUTPUT" | grep -q "TEXT_OK"; then
     echo "Text module tests passed"
-    exit 0
 else
     echo "Text module tests failed!" >&2
+    exit 7
+fi
+
+# ───────────────── Camera module tests ─────────────────
+echo ""
+echo "Running camera module tests..."
+CAMERA_OUTPUT=$(lua -e '
+package.cpath = "./?.so;" .. package.cpath
+local pb = require("PudimBasicsGl")
+
+local pass = 0
+local fail = 0
+local function check(name, cond)
+    if cond then pass = pass + 1; print("  OK: " .. name)
+    else fail = fail + 1; print("  FAIL: " .. name) end
+end
+
+-- camera subtable exists
+check("pb.camera exists", type(pb.camera) == "table")
+
+-- functions exist
+check("set_position is function", type(pb.camera.set_position) == "function")
+check("get_position is function", type(pb.camera.get_position) == "function")
+check("move is function", type(pb.camera.move) == "function")
+check("set_zoom is function", type(pb.camera.set_zoom) == "function")
+check("get_zoom is function", type(pb.camera.get_zoom) == "function")
+check("set_rotation is function", type(pb.camera.set_rotation) == "function")
+check("get_rotation is function", type(pb.camera.get_rotation) == "function")
+check("look_at is function", type(pb.camera.look_at) == "function")
+check("reset is function", type(pb.camera.reset) == "function")
+check("screen_to_world is function", type(pb.camera.screen_to_world) == "function")
+check("world_to_screen is function", type(pb.camera.world_to_screen) == "function")
+
+-- default values
+local x, y = pb.camera.get_position()
+check("default position x == 0", math.abs(x) < 0.001)
+check("default position y == 0", math.abs(y) < 0.001)
+check("default zoom == 1", math.abs(pb.camera.get_zoom() - 1.0) < 0.001)
+check("default rotation == 0", math.abs(pb.camera.get_rotation()) < 0.001)
+
+-- set/get position
+pb.camera.set_position(100, 200)
+x, y = pb.camera.get_position()
+check("set_position x", math.abs(x - 100) < 0.001)
+check("set_position y", math.abs(y - 200) < 0.001)
+
+-- move
+pb.camera.move(50, -30)
+x, y = pb.camera.get_position()
+check("move x", math.abs(x - 150) < 0.001)
+check("move y", math.abs(y - 170) < 0.001)
+
+-- zoom
+pb.camera.set_zoom(2.5)
+check("set_zoom", math.abs(pb.camera.get_zoom() - 2.5) < 0.001)
+
+-- zoom rejects <= 0
+pb.camera.set_zoom(-1)
+check("zoom rejects negative", math.abs(pb.camera.get_zoom() - 2.5) < 0.001)
+
+-- rotation
+pb.camera.set_rotation(45)
+check("set_rotation", math.abs(pb.camera.get_rotation() - 45) < 0.001)
+
+-- reset
+pb.camera.reset()
+x, y = pb.camera.get_position()
+check("reset position x", math.abs(x) < 0.001)
+check("reset position y", math.abs(y) < 0.001)
+check("reset zoom", math.abs(pb.camera.get_zoom() - 1.0) < 0.001)
+check("reset rotation", math.abs(pb.camera.get_rotation()) < 0.001)
+
+-- look_at (centers point on screen)
+pb.camera.look_at(400, 300, 800, 600)
+x, y = pb.camera.get_position()
+check("look_at x", math.abs(x - 0) < 0.001)   -- 400 - 800/2 = 0
+check("look_at y", math.abs(y - 0) < 0.001)   -- 300 - 600/2 = 0
+
+pb.camera.look_at(500, 400, 800, 600)
+x, y = pb.camera.get_position()
+check("look_at offset x", math.abs(x - 100) < 0.001) -- 500 - 400 = 100
+check("look_at offset y", math.abs(y - 100) < 0.001) -- 400 - 300 = 100
+
+-- coordinate conversion (needs a window for renderer_begin to set screen size)
+local w = pb.window.create(1, 1, "camera_test")
+pb.renderer.init()
+pb.camera.reset()
+pb.renderer.begin(800, 600)
+
+-- with default camera, screen == world
+local wx, wy = pb.camera.screen_to_world(100, 200)
+check("s2w default x", math.abs(wx - 100) < 1)
+check("s2w default y", math.abs(wy - 200) < 1)
+
+local sx, sy = pb.camera.world_to_screen(100, 200)
+check("w2s default x", math.abs(sx - 100) < 1)
+check("w2s default y", math.abs(sy - 200) < 1)
+
+-- with offset camera
+pb.camera.set_position(50, 50)
+pb.renderer.begin(800, 600)
+wx, wy = pb.camera.screen_to_world(0, 0)
+check("s2w offset x", math.abs(wx - 50) < 1)
+check("s2w offset y", math.abs(wy - 50) < 1)
+
+sx, sy = pb.camera.world_to_screen(50, 50)
+check("w2s offset x", math.abs(sx - 0) < 1)
+check("w2s offset y", math.abs(sy - 0) < 1)
+
+-- roundtrip: world -> screen -> world
+pb.camera.set_position(123, 456)
+pb.camera.set_zoom(1.5)
+pb.camera.set_rotation(30)
+pb.renderer.begin(800, 600)
+local orig_x, orig_y = 300, 400
+sx, sy = pb.camera.world_to_screen(orig_x, orig_y)
+wx, wy = pb.camera.screen_to_world(sx, sy)
+check("roundtrip x", math.abs(wx - orig_x) < 1)
+check("roundtrip y", math.abs(wy - orig_y) < 1)
+
+pb.renderer.finish()
+pb.window.destroy(w)
+
+print(string.format("CAMERA_RESULT: %d passed, %d failed", pass, fail))
+if fail > 0 then os.exit(7) end
+print("CAMERA_OK")
+' 2>&1 || true)
+
+printf "%s\n" "$CAMERA_OUTPUT"
+
+if printf "%s\n" "$CAMERA_OUTPUT" | grep -q "CAMERA_OK"; then
+    echo "Camera module tests passed"
+    exit 0
+else
+    echo "Camera module tests failed!" >&2
     exit 7
 fi

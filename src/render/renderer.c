@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "texture.h"
+#include "camera.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -170,20 +171,9 @@ void renderer_begin(int screen_width, int screen_height) {
     // Update text renderer screen size too
     text_renderer_set_screen_size(screen_width, screen_height);
     
-    // Create orthographic projection matrix (2D)
-    float left = 0.0f;
-    float right = (float)screen_width;
-    float bottom = (float)screen_height;
-    float top = 0.0f;
-    float near_val = -1.0f;
-    float far_val = 1.0f;
-    
-    float projection[16] = {
-        2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-        0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-        0.0f, 0.0f, -2.0f / (far_val - near_val), 0.0f,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far_val + near_val) / (far_val - near_val), 1.0f
-    };
+    // Create projection * view matrix (incorporates camera transform)
+    float projection[16];
+    camera_get_matrix(projection, screen_width, screen_height);
     
     glUseProgram(state.shader);
     glUniformMatrix4fv(state.projection_loc, 1, GL_FALSE, projection);

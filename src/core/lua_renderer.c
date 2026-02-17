@@ -231,20 +231,6 @@ static int l_renderer_color_unpack(lua_State* L) {
     return 4;
 }
 
-// pudim.renderer.color255_unpack(color) -> r, g, b, a (0-255)
-static int l_renderer_color255_unpack(lua_State* L) {
-    luaL_checktype(L, 1, LUA_TTABLE);
-    lua_getfield(L, 1, "r"); float r = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-    lua_getfield(L, 1, "g"); float g = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-    lua_getfield(L, 1, "b"); float b = (float)lua_tonumber(L, -1); lua_pop(L, 1);
-    lua_getfield(L, 1, "a"); float a = lua_isnil(L, -1) ? 1.0f : (float)lua_tonumber(L, -1); lua_pop(L, 1);
-    lua_pushinteger(L, (int)(r * 255.0f + 0.5f));
-    lua_pushinteger(L, (int)(g * 255.0f + 0.5f));
-    lua_pushinteger(L, (int)(b * 255.0f + 0.5f));
-    lua_pushinteger(L, (int)(a * 255.0f + 0.5f));
-    return 4;
-}
-
 // pudim.renderer.enable_depth_test(enable)
 static int l_renderer_enable_depth_test(lua_State* L) {
     int enable = lua_toboolean(L, 1);
@@ -317,7 +303,6 @@ static const luaL_Reg renderer_funcs[] = {
     {"color", l_renderer_color},
     {"color255", l_renderer_color255},
     {"color_unpack", l_renderer_color_unpack},
-    {"color255_unpack", l_renderer_color255_unpack},
     {"set_clear_color", l_renderer_set_clear_color},
     {"enable_depth_test", l_renderer_enable_depth_test},
     {"enable_blend", l_renderer_enable_blend},

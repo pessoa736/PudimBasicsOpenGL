@@ -14,6 +14,7 @@
 ---@field input PudimBasicsGl.input Keyboard and mouse input module
 ---@field audio PudimBasicsGl.audio Audio loading and playback module
 ---@field text PudimBasicsGl.text Text rendering and font module
+---@field camera PudimBasicsGl.camera 2D camera module
 local PudimBasicsGl = {}
 
 --------------------------------------------------------------------------------
@@ -318,14 +319,6 @@ function PudimBasicsGl.renderer.color255(r, g, b, a) end
 ---@return number a Alpha component (0.0-1.0)
 function PudimBasicsGl.renderer.color_unpack(color) end
 
----Unpack a Color table into individual integer values (0-255)
----@param color Color The color table to unpack
----@return integer r Red component (0-255)
----@return integer g Green component (0-255)
----@return integer b Blue component (0-255)
----@return integer a Alpha component (0-255)
-function PudimBasicsGl.renderer.color255_unpack(color) end
-
 ---Set the clear color (used by clear())
 ---@param r number Red component (0.0-1.0)
 ---@param g number Green component (0.0-1.0)
@@ -610,5 +603,73 @@ function PudimBasicsGl.text.load(filepath, size) end
 
 ---Flush pending text draws to the screen
 function PudimBasicsGl.text.flush() end
+
+--------------------------------------------------------------------------------
+-- Camera Module
+--------------------------------------------------------------------------------
+
+---@class PudimBasicsGl.camera
+PudimBasicsGl.camera = {}
+
+---Set the camera position (world offset)
+---At (0, 0) the view is identical to no camera
+---@param x number X position in world space
+---@param y number Y position in world space
+function PudimBasicsGl.camera.set_position(x, y) end
+
+---Get the camera position
+---@return number x X position
+---@return number y Y position
+function PudimBasicsGl.camera.get_position() end
+
+---Move the camera by a delta
+---@param dx number Delta X
+---@param dy number Delta Y
+function PudimBasicsGl.camera.move(dx, dy) end
+
+---Set camera zoom level (default 1.0)
+---Values > 1.0 zoom in, < 1.0 zoom out. Zoom is applied around screen center.
+---@param zoom number Zoom level (must be > 0)
+function PudimBasicsGl.camera.set_zoom(zoom) end
+
+---Get camera zoom level
+---@return number zoom Current zoom level
+function PudimBasicsGl.camera.get_zoom() end
+
+---Set camera rotation in degrees (default 0.0)
+---Rotation is applied around the screen center.
+---@param angle number Rotation angle in degrees
+function PudimBasicsGl.camera.set_rotation(angle) end
+
+---Get camera rotation in degrees
+---@return number angle Current rotation angle
+function PudimBasicsGl.camera.get_rotation() end
+
+---Center the camera on a world point
+---Sets position so that (x, y) appears at screen center
+---@param x number World X to center on
+---@param y number World Y to center on
+---@param screen_width integer Screen width in pixels
+---@param screen_height integer Screen height in pixels
+function PudimBasicsGl.camera.look_at(x, y, screen_width, screen_height) end
+
+---Reset camera to defaults (position=0,0  zoom=1  rotation=0)
+function PudimBasicsGl.camera.reset() end
+
+---Convert screen coordinates to world coordinates
+---Uses the last screen size from renderer.begin()
+---@param sx number Screen X coordinate
+---@param sy number Screen Y coordinate
+---@return number wx World X coordinate
+---@return number wy World Y coordinate
+function PudimBasicsGl.camera.screen_to_world(sx, sy) end
+
+---Convert world coordinates to screen coordinates
+---Uses the last screen size from renderer.begin()
+---@param wx number World X coordinate
+---@param wy number World Y coordinate
+---@return number sx Screen X coordinate
+---@return number sy Screen Y coordinate
+function PudimBasicsGl.camera.world_to_screen(wx, wy) end
 
 return PudimBasicsGl

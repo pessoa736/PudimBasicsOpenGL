@@ -59,6 +59,7 @@ build = {
                 "src/render/renderer.c",
                 "src/render/texture.c",
                 "src/render/text.c",
+                "src/render/camera.c",
                 "src/audio/audio.c",
                 "src/core/lua_window.c",
                 "src/core/lua_renderer.c",
@@ -67,6 +68,7 @@ build = {
                 "src/core/lua_input.c",
                 "src/core/lua_audio.c",
                 "src/core/lua_text.c",
+                "src/core/lua_camera.c",
                 "external/glad/src/glad.c",
             },
             incdirs = {

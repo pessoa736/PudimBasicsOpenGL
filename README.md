@@ -239,7 +239,6 @@ font:destroy()
 | `color(r, g, b, a)` | Create a color table (0.0-1.0 floats or hex) |
 | `color255(r, g, b, a)` | Create a color table from 0-255 integers |
 | `color_unpack(color)` | Unpack Color table → r, g, b, a (0.0-1.0) |
-| `color255_unpack(color)` | Unpack Color table → r, g, b, a (0-255) |
 | `colors.WHITE`, `colors.RED`, etc. | Predefined colors |
 
 ### pb.texture
@@ -340,6 +339,22 @@ font:destroy()
 | `get()` | Get total time since init |
 | `fps()` | Get current FPS |
 | `sleep(seconds)` | Busy-wait sleep |
+
+### pb.camera
+
+| Function | Description |
+|----------|-------------|
+| `set_position(x, y)` | Set camera world offset (0,0 = no offset) |
+| `get_position()` | Get camera position → x, y |
+| `move(dx, dy)` | Move camera by delta |
+| `set_zoom(zoom)` | Set zoom level (1.0 = normal, >1 = zoom in) |
+| `get_zoom()` | Get current zoom level |
+| `set_rotation(angle)` | Set rotation in degrees |
+| `get_rotation()` | Get rotation in degrees |
+| `look_at(x, y, sw, sh)` | Center camera on world point |
+| `reset()` | Reset to defaults (pos=0,0  zoom=1  rot=0) |
+| `screen_to_world(sx, sy)` | Convert screen → world coordinates |
+| `world_to_screen(wx, wy)` | Convert world → screen coordinates |
 
 ### Color Format
 

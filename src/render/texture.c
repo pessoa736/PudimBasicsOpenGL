@@ -2,6 +2,7 @@
 #include "stb/stb_image.h"
 
 #include "texture.h"
+#include "camera.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -141,20 +142,9 @@ void texture_renderer_shutdown(void) {
 void texture_renderer_flush(void) {
     if (tex_state.vertex_count == 0 || !tex_state.initialized) return;
     
-    // Create orthographic projection
-    float left = 0.0f;
-    float right = (float)tex_state.screen_width;
-    float bottom = (float)tex_state.screen_height;
-    float top = 0.0f;
-    float near_val = -1.0f;
-    float far_val = 1.0f;
-    
-    float projection[16] = {
-        2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-        0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
-        0.0f, 0.0f, -2.0f / (far_val - near_val), 0.0f,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far_val + near_val) / (far_val - near_val), 1.0f
-    };
+    // Create projection * view matrix (incorporates camera transform)
+    float projection[16];
+    camera_get_matrix(projection, tex_state.screen_width, tex_state.screen_height);
     
     glUseProgram(tex_state.shader);
     glUniformMatrix4fv(tex_state.projection_loc, 1, GL_FALSE, projection);
