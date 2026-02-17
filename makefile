@@ -27,7 +27,7 @@ ifeq ($(DETECTED_OS),Windows)
 else
     # Linux/Unix
     EXT = .so
-    LDFLAGS = -shared -lglfw -lGL -lm -ldl
+    LDFLAGS = -shared -lglfw -lGL -lm -ldl -lpthread
     RM = rm -rf
     MKDIR = mkdir -p
     
@@ -56,10 +56,13 @@ SRC = src/main.c \
       src/platform/window.c \
       src/render/renderer.c \
       src/render/texture.c \
+      src/audio/audio.c \
       src/core/lua_window.c \
       src/core/lua_renderer.c \
       src/core/lua_time.c \
       src/core/lua_texture.c \
+      src/core/lua_input.c \
+      src/core/lua_audio.c \
       external/glad/src/glad.c
 
 INCLUDES = -Iexternal/glad/include -Iexternal -Isrc $(LUA_CFLAGS)

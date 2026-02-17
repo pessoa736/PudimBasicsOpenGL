@@ -11,6 +11,8 @@
 ---@field renderer PudimBasicsGl.renderer 2D rendering module
 ---@field time PudimBasicsGl.time Time/delta time module
 ---@field texture PudimBasicsGl.texture Texture loading and rendering module
+---@field input PudimBasicsGl.input Keyboard and mouse input module
+---@field audio PudimBasicsGl.audio Audio loading and playback module
 local PudimBasicsGl = {}
 
 --------------------------------------------------------------------------------
@@ -399,5 +401,160 @@ function PudimBasicsGl.time.fps() end
 ---Sleep for a specified duration (busy wait)
 ---@param seconds number Duration to sleep in seconds
 function PudimBasicsGl.time.sleep(seconds) end
+
+--------------------------------------------------------------------------------
+-- Input Module
+--------------------------------------------------------------------------------
+
+---@class PudimBasicsGl.input
+---
+--- Key constants (GLFW key codes)
+---@field KEY_SPACE integer Space key
+---@field KEY_ESCAPE integer Escape key
+---@field KEY_ENTER integer Enter/Return key
+---@field KEY_TAB integer Tab key
+---@field KEY_BACKSPACE integer Backspace key
+---
+--- Arrow keys
+---@field KEY_UP integer Up arrow
+---@field KEY_DOWN integer Down arrow
+---@field KEY_LEFT integer Left arrow
+---@field KEY_RIGHT integer Right arrow
+---
+--- Letter keys (A-Z)
+---@field KEY_A integer
+---@field KEY_B integer
+---@field KEY_C integer
+---@field KEY_D integer
+---@field KEY_E integer
+---@field KEY_F integer
+---@field KEY_G integer
+---@field KEY_H integer
+---@field KEY_I integer
+---@field KEY_J integer
+---@field KEY_K integer
+---@field KEY_L integer
+---@field KEY_M integer
+---@field KEY_N integer
+---@field KEY_O integer
+---@field KEY_P integer
+---@field KEY_Q integer
+---@field KEY_R integer
+---@field KEY_S integer
+---@field KEY_T integer
+---@field KEY_U integer
+---@field KEY_V integer
+---@field KEY_W integer
+---@field KEY_X integer
+---@field KEY_Y integer
+---@field KEY_Z integer
+---
+--- Number keys (0-9)
+---@field KEY_0 integer
+---@field KEY_1 integer
+---@field KEY_2 integer
+---@field KEY_3 integer
+---@field KEY_4 integer
+---@field KEY_5 integer
+---@field KEY_6 integer
+---@field KEY_7 integer
+---@field KEY_8 integer
+---@field KEY_9 integer
+---
+--- Function keys
+---@field KEY_F1 integer
+---@field KEY_F2 integer
+---@field KEY_F3 integer
+---@field KEY_F11 integer
+---@field KEY_F12 integer
+---
+--- Modifier keys
+---@field KEY_LEFT_SHIFT integer Left Shift
+---@field KEY_RIGHT_SHIFT integer Right Shift
+---@field KEY_LEFT_CTRL integer Left Control
+---@field KEY_RIGHT_CTRL integer Right Control
+---@field KEY_LEFT_ALT integer Left Alt
+---@field KEY_RIGHT_ALT integer Right Alt
+---
+--- Mouse button constants
+---@field MOUSE_LEFT integer Left mouse button
+---@field MOUSE_RIGHT integer Right mouse button
+---@field MOUSE_MIDDLE integer Middle mouse button
+PudimBasicsGl.input = {}
+
+---Check if a key is currently pressed
+---@param key integer Key constant (e.g. `pb.input.KEY_SPACE`)
+---@return boolean pressed True if the key is held down
+function PudimBasicsGl.input.is_key_pressed(key) end
+
+---Check if a key is currently released (not pressed)
+---@param key integer Key constant (e.g. `pb.input.KEY_W`)
+---@return boolean released True if the key is not held down
+function PudimBasicsGl.input.is_key_released(key) end
+
+---Check if a mouse button is currently pressed
+---@param button integer Mouse button constant (e.g. `pb.input.MOUSE_LEFT`)
+---@return boolean pressed True if the button is held down
+function PudimBasicsGl.input.is_mouse_button_pressed(button) end
+
+---Get the current mouse cursor position relative to the window
+---@return number x Cursor X position in pixels
+---@return number y Cursor Y position in pixels
+function PudimBasicsGl.input.get_mouse_position() end
+
+---Set the mouse cursor position
+---@param x number X position in pixels
+---@param y number Y position in pixels
+function PudimBasicsGl.input.set_mouse_position(x, y) end
+
+---Show or hide the mouse cursor
+---@param visible boolean True to show the cursor, false to hide it
+function PudimBasicsGl.input.set_cursor_visible(visible) end
+
+---Lock or unlock the mouse cursor (for FPS-style camera control)
+---@param locked boolean True to lock (disable) the cursor, false to unlock
+function PudimBasicsGl.input.set_cursor_locked(locked) end
+
+--------------------------------------------------------------------------------
+-- Audio Module
+--------------------------------------------------------------------------------
+
+---@class Sound
+---Opaque sound handle (userdata). Loaded via `pb.audio.load()`.
+---Automatically freed by garbage collection, or manually via `:destroy()`.
+---@field play fun(self: Sound) Play the sound from the beginning
+---@field stop fun(self: Sound) Stop playback and rewind to start
+---@field pause fun(self: Sound) Pause playback at the current position
+---@field resume fun(self: Sound) Resume playback from where it was paused
+---@field is_playing fun(self: Sound): boolean Check if the sound is currently playing
+---@field set_looping fun(self: Sound, loop: boolean) Enable or disable looping
+---@field is_looping fun(self: Sound): boolean Check if looping is enabled
+---@field set_volume fun(self: Sound, volume: number) Set volume (0.0 = silent, 1.0 = normal, >1.0 = amplified)
+---@field get_volume fun(self: Sound): number Get current volume
+---@field set_pitch fun(self: Sound, pitch: number) Set pitch/speed (1.0 = normal, 0.5 = half speed, 2.0 = double)
+---@field get_pitch fun(self: Sound): number Get current pitch
+---@field destroy fun(self: Sound) Destroy the sound and free resources
+
+---@class PudimBasicsGl.audio
+PudimBasicsGl.audio = {}
+
+---Load an audio file (WAV, MP3, FLAC)
+---Also available as method: `pb.audio:load(filepath)`
+---@overload fun(self: PudimBasicsGl.audio, filepath: string): Sound?, string?
+---@param filepath string Path to the audio file
+---@return Sound? sound The loaded sound, or nil on failure
+---@return string? error Error message if loading failed
+function PudimBasicsGl.audio.load(filepath) end
+
+---Set the master volume (affects all sounds)
+---@param volume number Master volume (0.0 = silent, 1.0 = normal, >1.0 = amplified)
+function PudimBasicsGl.audio.set_master_volume(volume) end
+
+---Get the current master volume
+---@return number volume Current master volume
+function PudimBasicsGl.audio.get_master_volume() end
+
+---Shutdown the audio engine and release all resources
+function PudimBasicsGl.audio.shutdown() end
 
 return PudimBasicsGl

@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, and **time**. Input handling and math utilities are left to the developer's choice.
+A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, and **time**. Math utilities are left to the developer's choice.
 
 > [!WARNING]
 > This project is **experimental**. APIs and features may change without notice — use with caution.
@@ -12,6 +12,8 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 - **Window**: Create and manage OpenGL windows with VSync, fullscreen, and resize support
 - **Renderer**: Draw 2D primitives (pixels, lines, rectangles, circles, triangles)
 - **Textures**: Load images (PNG, JPG, BMP, etc.) and draw them with rotation, tinting, and sprite sheet support
+- **Input**: Keyboard and mouse input (key state, mouse position, cursor control)
+- **Audio**: Load and play audio files (WAV, MP3, FLAC) with volume, pitch, and looping via [miniaudio](https://github.com/mackron/miniaudio)
 - **Time**: Delta time, FPS, and timing utilities
 
 ## Building
@@ -50,6 +52,10 @@ win:swap_buffers()
 ---@type PudimBasicsGl.Texture
 local tex = pb.texture.load("sprite.png")
 -- `tex:` will show texture methods such as `draw`, `get_size`, etc.
+
+---@type Sound
+local snd = pb.audio.load("music.mp3")
+-- `snd:` will show audio methods such as `play`, `stop`, `set_volume`, etc.
 ```
 
 
@@ -107,6 +113,42 @@ end
 
 if texture then texture:destroy() end
 pb.window.destroy(window)
+```
+
+### Input Example
+
+```lua
+-- Keyboard
+if pb.input.is_key_pressed(pb.input.KEY_W) then
+    player.y = player.y - speed * dt
+end
+if pb.input.is_key_pressed(pb.input.KEY_ESCAPE) then
+    break
+end
+
+-- Mouse
+local mx, my = pb.input.get_mouse_position()
+if pb.input.is_mouse_button_pressed(pb.input.MOUSE_LEFT) then
+    -- handle click
+end
+```
+
+### Audio Example
+
+```lua
+local music = pb.audio.load("music.mp3")
+music:set_looping(true)
+music:set_volume(0.8)
+music:play()
+
+-- Later...
+music:pause()
+music:resume()
+music:stop()
+music:destroy()
+
+pb.audio.set_master_volume(0.5)
+pb.audio.shutdown()
 ```
 
 ## API Reference
@@ -180,6 +222,52 @@ pb.window.destroy(window)
 | `texture:get_width()` | Get width |
 | `texture:get_height()` | Get height |
 | `texture:destroy()` | Free texture resources |
+
+### pb.input
+
+| Function | Description |
+|----------|-------------|
+| `is_key_pressed(key)` | Check if a key is currently held down |
+| `is_key_released(key)` | Check if a key is not held down |
+| `is_mouse_button_pressed(button)` | Check if a mouse button is held down |
+| `get_mouse_position()` | Get cursor position (x, y) |
+| `set_mouse_position(x, y)` | Set cursor position |
+| `set_cursor_visible(visible)` | Show/hide the cursor |
+| `set_cursor_locked(locked)` | Lock/unlock cursor (FPS-style) |
+
+#### Key Constants
+
+`KEY_A` to `KEY_Z`, `KEY_0` to `KEY_9`, `KEY_SPACE`, `KEY_ESCAPE`, `KEY_ENTER`, `KEY_TAB`, `KEY_BACKSPACE`, `KEY_UP`, `KEY_DOWN`, `KEY_LEFT`, `KEY_RIGHT`, `KEY_F1` to `KEY_F3`, `KEY_F11`, `KEY_F12`, `KEY_LEFT_SHIFT`, `KEY_RIGHT_SHIFT`, `KEY_LEFT_CTRL`, `KEY_RIGHT_CTRL`, `KEY_LEFT_ALT`, `KEY_RIGHT_ALT`
+
+#### Mouse Constants
+
+`MOUSE_LEFT`, `MOUSE_RIGHT`, `MOUSE_MIDDLE`
+
+### pb.audio
+
+| Function | Description |
+|----------|-------------|
+| `load(filepath)` | Load audio file (WAV, MP3, FLAC), returns Sound |
+| `set_master_volume(volume)` | Set master volume (0.0–2.0) |
+| `get_master_volume()` | Get current master volume |
+| `shutdown()` | Shutdown audio engine |
+
+#### Sound Methods
+
+| Method | Description |
+|--------|-------------|
+| `sound:play()` | Play from the beginning |
+| `sound:stop()` | Stop and rewind |
+| `sound:pause()` | Pause at current position |
+| `sound:resume()` | Resume from paused position |
+| `sound:is_playing()` | Check if playing |
+| `sound:set_looping(bool)` | Enable/disable looping |
+| `sound:is_looping()` | Check if looping |
+| `sound:set_volume(vol)` | Set volume (0.0 = silent, 1.0 = normal) |
+| `sound:get_volume()` | Get current volume |
+| `sound:set_pitch(pitch)` | Set pitch (1.0 = normal, 0.5 = slow, 2.0 = fast) |
+| `sound:get_pitch()` | Get current pitch |
+| `sound:destroy()` | Free sound resources |
 
 ### pb.time
 
@@ -255,9 +343,14 @@ local pb = require("PudimBasicsGl")
 
 ## Example Scripts
 
-- `scripts/main.lua` - Basic rendering demo
-- `scripts/texture_demo.lua` - Texture loading and drawing
-- `scripts/window_demo.lua` - VSync and window features
+- `examples/main.lua` - Basic rendering demo
+- `examples/minimal.lua` - Minimal example
+- `examples/texture_demo.lua` - Texture loading and drawing
+- `examples/window_demo.lua` - VSync and window features
+- `examples/input_demo.lua` - Keyboard and mouse input demo
+- `examples/audio_demo.lua` - Audio loading and playback demo
+- `examples/oop_demo.lua` - Object-oriented style API demo
+- `examples/api_reference.lua` - Complete API reference example
 ## Command-line tool (pbgl)
 
 A small CLI named `pbgl` is installed with the rock. It provides two commands:
@@ -276,14 +369,12 @@ Make sure `~/.luarocks/bin` is in your PATH so you can call `pbgl` directly:
 ```bash
 export PATH="$HOME/.luarocks/bin:$PATH"
 ```
-## Why No Input/Math?
+## Credits
 
-PudimBasicsGl is intentionally minimal. For input, you can:
-- Access GLFW directly via `pb.window.get_handle(window)`
-- Use a dedicated input library
-- Implement your own using FFI
-
-For math, Lua's built-in `math` library covers most needs, and there are excellent libraries like `cpml` or `batteries` available.
+- Sample audio file (`examples/example.mp3`) from [file-examples.com](https://file-examples.com/index.php/sample-audio-files/sample-mp3-download/) — used for testing/demo purposes only.
+- [miniaudio](https://github.com/mackron/miniaudio) — single-header audio library by David Reid (public domain / MIT-0).
+- [stb_image](https://github.com/nothings/stb) — single-header image loader by Sean Barrett (public domain / MIT).
+- [GLAD](https://glad.dav1d.de/) — OpenGL loader generator.
 
 ## License
 
