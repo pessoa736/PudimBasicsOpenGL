@@ -50,7 +50,7 @@ luarocks install pudimbasicsgl
 Ou compile a partir do rockspec local:
 
 ```bash
-luarocks make pudimbasicsgl-1.0.0-14.rockspec
+luarocks make pudimbasicsgl-1.0.0-15.rockspec
 ```
 
 O rockspec usa o build type `builtin` — o LuaRocks compila todos os `.c` diretamente em `.so` (Linux) ou `.dll` (Windows), sem precisar do makefile. O comando `make` só é necessário para desenvolvimento local.
@@ -389,6 +389,7 @@ local pb = require("PudimBasicsGl")
 - `examples/audio_demo.lua` - Demo de carregamento e reprodução de áudio
 - `examples/oop_demo.lua` - Demo com estilo orientado a objetos
 - `examples/text_demo.lua` - Demo de renderização de texto e carregamento de fontes
+- `examples/camera_demo.lua` - Demo de câmera 2D: pan, zoom, rotação e conversão de coordenadas
 - `examples/api_reference.lua` - Exemplo completo de referência da API
 
 ## Ferramenta de linha de comando (pbgl)

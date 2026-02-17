@@ -132,10 +132,10 @@ static int l_texture_draw(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_optinteger(L, 4, (*tex)->width);
-    int h = (int)luaL_optinteger(L, 5, (*tex)->height);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_optnumber(L, 4, (*tex)->width);
+    int h = (int)luaL_optnumber(L, 5, (*tex)->height);
     
     render_texture(*tex, x, y, w, h);
     return 0;
@@ -146,10 +146,10 @@ static int l_texture_draw_tinted(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_checkinteger(L, 4);
-    int h = (int)luaL_checkinteger(L, 5);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_checknumber(L, 4);
+    int h = (int)luaL_checknumber(L, 5);
     float r = (float)luaL_checknumber(L, 6);
     float g = (float)luaL_checknumber(L, 7);
     float b = (float)luaL_checknumber(L, 8);
@@ -164,10 +164,10 @@ static int l_texture_draw_rotated(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_checkinteger(L, 4);
-    int h = (int)luaL_checkinteger(L, 5);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_checknumber(L, 4);
+    int h = (int)luaL_checknumber(L, 5);
     float angle = (float)luaL_checknumber(L, 6);
     
     render_texture_rotated(*tex, x, y, w, h, angle);
@@ -179,10 +179,10 @@ static int l_texture_draw_ex(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_checkinteger(L, 4);
-    int h = (int)luaL_checkinteger(L, 5);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_checknumber(L, 4);
+    int h = (int)luaL_checknumber(L, 5);
     float angle = (float)luaL_checknumber(L, 6);
     float ox = (float)luaL_optnumber(L, 7, 0.5);
     float oy = (float)luaL_optnumber(L, 8, 0.5);
@@ -200,14 +200,14 @@ static int l_texture_draw_region(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_checkinteger(L, 4);
-    int h = (int)luaL_checkinteger(L, 5);
-    int sx = (int)luaL_checkinteger(L, 6);
-    int sy = (int)luaL_checkinteger(L, 7);
-    int sw = (int)luaL_checkinteger(L, 8);
-    int sh = (int)luaL_checkinteger(L, 9);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_checknumber(L, 4);
+    int h = (int)luaL_checknumber(L, 5);
+    int sx = (int)luaL_checknumber(L, 6);
+    int sy = (int)luaL_checknumber(L, 7);
+    int sw = (int)luaL_checknumber(L, 8);
+    int sh = (int)luaL_checknumber(L, 9);
     
     render_texture_region(*tex, x, y, w, h, sx, sy, sw, sh);
     return 0;
@@ -218,14 +218,14 @@ static int l_texture_draw_region_ex(lua_State* L) {
     Texture** tex = check_texture(L, 1);
     if (!*tex) return 0;
     
-    int x = (int)luaL_checkinteger(L, 2);
-    int y = (int)luaL_checkinteger(L, 3);
-    int w = (int)luaL_checkinteger(L, 4);
-    int h = (int)luaL_checkinteger(L, 5);
-    int sx = (int)luaL_checkinteger(L, 6);
-    int sy = (int)luaL_checkinteger(L, 7);
-    int sw = (int)luaL_checkinteger(L, 8);
-    int sh = (int)luaL_checkinteger(L, 9);
+    int x = (int)luaL_checknumber(L, 2);
+    int y = (int)luaL_checknumber(L, 3);
+    int w = (int)luaL_checknumber(L, 4);
+    int h = (int)luaL_checknumber(L, 5);
+    int sx = (int)luaL_checknumber(L, 6);
+    int sy = (int)luaL_checknumber(L, 7);
+    int sw = (int)luaL_checknumber(L, 8);
+    int sh = (int)luaL_checknumber(L, 9);
     float angle = (float)luaL_optnumber(L, 10, 0.0);
     float ox = (float)luaL_optnumber(L, 11, 0.5);
     float oy = (float)luaL_optnumber(L, 12, 0.5);

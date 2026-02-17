@@ -44,8 +44,8 @@ static int l_renderer_clear(lua_State* L) {
 
 // pudim.renderer.begin(width, height)
 static int l_renderer_begin(lua_State* L) {
-    int width = (int)luaL_checkinteger(L, 1);
-    int height = (int)luaL_checkinteger(L, 2);
+    int width = (int)luaL_checknumber(L, 1);
+    int height = (int)luaL_checknumber(L, 2);
     renderer_begin(width, height);
     return 0;
 }
@@ -66,8 +66,8 @@ static int l_renderer_flush(lua_State* L) {
 
 // pudim.renderer.pixel(x, y, r, g, b, a?) or pixel(x, y, color_table)
 static int l_renderer_pixel(lua_State* L) {
-    int x = (int)luaL_checkinteger(L, 1);
-    int y = (int)luaL_checkinteger(L, 2);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
     Color c = get_color_from_lua(L, 3);
     render_pixel(x, y, c);
     return 0;
@@ -75,10 +75,10 @@ static int l_renderer_pixel(lua_State* L) {
 
 // pudim.renderer.line(x1, y1, x2, y2, r, g, b, a?)
 static int l_renderer_line(lua_State* L) {
-    int x1 = (int)luaL_checkinteger(L, 1);
-    int y1 = (int)luaL_checkinteger(L, 2);
-    int x2 = (int)luaL_checkinteger(L, 3);
-    int y2 = (int)luaL_checkinteger(L, 4);
+    int x1 = (int)luaL_checknumber(L, 1);
+    int y1 = (int)luaL_checknumber(L, 2);
+    int x2 = (int)luaL_checknumber(L, 3);
+    int y2 = (int)luaL_checknumber(L, 4);
     Color c = get_color_from_lua(L, 5);
     render_line(x1, y1, x2, y2, c);
     return 0;
@@ -86,10 +86,10 @@ static int l_renderer_line(lua_State* L) {
 
 // pudim.renderer.rect(x, y, w, h, r, g, b, a?)
 static int l_renderer_rect(lua_State* L) {
-    int x = (int)luaL_checkinteger(L, 1);
-    int y = (int)luaL_checkinteger(L, 2);
-    int w = (int)luaL_checkinteger(L, 3);
-    int h = (int)luaL_checkinteger(L, 4);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
+    int w = (int)luaL_checknumber(L, 3);
+    int h = (int)luaL_checknumber(L, 4);
     Color c = get_color_from_lua(L, 5);
     render_rect(x, y, w, h, c);
     return 0;
@@ -97,10 +97,10 @@ static int l_renderer_rect(lua_State* L) {
 
 // pudim.renderer.rect_filled(x, y, w, h, r, g, b, a?)
 static int l_renderer_rect_filled(lua_State* L) {
-    int x = (int)luaL_checkinteger(L, 1);
-    int y = (int)luaL_checkinteger(L, 2);
-    int w = (int)luaL_checkinteger(L, 3);
-    int h = (int)luaL_checkinteger(L, 4);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
+    int w = (int)luaL_checknumber(L, 3);
+    int h = (int)luaL_checknumber(L, 4);
     Color c = get_color_from_lua(L, 5);
     render_rect_filled(x, y, w, h, c);
     return 0;
@@ -108,9 +108,9 @@ static int l_renderer_rect_filled(lua_State* L) {
 
 // pudim.renderer.circle(cx, cy, radius, r, g, b, a?)
 static int l_renderer_circle(lua_State* L) {
-    int cx = (int)luaL_checkinteger(L, 1);
-    int cy = (int)luaL_checkinteger(L, 2);
-    int radius = (int)luaL_checkinteger(L, 3);
+    int cx = (int)luaL_checknumber(L, 1);
+    int cy = (int)luaL_checknumber(L, 2);
+    int radius = (int)luaL_checknumber(L, 3);
     Color c = get_color_from_lua(L, 4);
     render_circle(cx, cy, radius, c);
     return 0;
@@ -118,9 +118,9 @@ static int l_renderer_circle(lua_State* L) {
 
 // pudim.renderer.circle_filled(cx, cy, radius, r, g, b, a?)
 static int l_renderer_circle_filled(lua_State* L) {
-    int cx = (int)luaL_checkinteger(L, 1);
-    int cy = (int)luaL_checkinteger(L, 2);
-    int radius = (int)luaL_checkinteger(L, 3);
+    int cx = (int)luaL_checknumber(L, 1);
+    int cy = (int)luaL_checknumber(L, 2);
+    int radius = (int)luaL_checknumber(L, 3);
     Color c = get_color_from_lua(L, 4);
     render_circle_filled(cx, cy, radius, c);
     return 0;
@@ -128,12 +128,12 @@ static int l_renderer_circle_filled(lua_State* L) {
 
 // pudim.renderer.triangle(x1, y1, x2, y2, x3, y3, r, g, b, a?)
 static int l_renderer_triangle(lua_State* L) {
-    int x1 = (int)luaL_checkinteger(L, 1);
-    int y1 = (int)luaL_checkinteger(L, 2);
-    int x2 = (int)luaL_checkinteger(L, 3);
-    int y2 = (int)luaL_checkinteger(L, 4);
-    int x3 = (int)luaL_checkinteger(L, 5);
-    int y3 = (int)luaL_checkinteger(L, 6);
+    int x1 = (int)luaL_checknumber(L, 1);
+    int y1 = (int)luaL_checknumber(L, 2);
+    int x2 = (int)luaL_checknumber(L, 3);
+    int y2 = (int)luaL_checknumber(L, 4);
+    int x3 = (int)luaL_checknumber(L, 5);
+    int y3 = (int)luaL_checknumber(L, 6);
     Color c = get_color_from_lua(L, 7);
     render_triangle(x1, y1, x2, y2, x3, y3, c);
     return 0;
@@ -141,12 +141,12 @@ static int l_renderer_triangle(lua_State* L) {
 
 // pudim.renderer.triangle_filled(x1, y1, x2, y2, x3, y3, r, g, b, a?)
 static int l_renderer_triangle_filled(lua_State* L) {
-    int x1 = (int)luaL_checkinteger(L, 1);
-    int y1 = (int)luaL_checkinteger(L, 2);
-    int x2 = (int)luaL_checkinteger(L, 3);
-    int y2 = (int)luaL_checkinteger(L, 4);
-    int x3 = (int)luaL_checkinteger(L, 5);
-    int y3 = (int)luaL_checkinteger(L, 6);
+    int x1 = (int)luaL_checknumber(L, 1);
+    int y1 = (int)luaL_checknumber(L, 2);
+    int x2 = (int)luaL_checknumber(L, 3);
+    int y2 = (int)luaL_checknumber(L, 4);
+    int x3 = (int)luaL_checknumber(L, 5);
+    int y3 = (int)luaL_checknumber(L, 6);
     Color c = get_color_from_lua(L, 7);
     render_triangle_filled(x1, y1, x2, y2, x3, y3, c);
     return 0;
@@ -256,10 +256,10 @@ static int l_renderer_enable_blend(lua_State* L) {
 
 // pudim.renderer.set_viewport(x, y, width, height)
 static int l_renderer_set_viewport(lua_State* L) {
-    int x = (int)luaL_checkinteger(L, 1);
-    int y = (int)luaL_checkinteger(L, 2);
-    int w = (int)luaL_checkinteger(L, 3);
-    int h = (int)luaL_checkinteger(L, 4);
+    int x = (int)luaL_checknumber(L, 1);
+    int y = (int)luaL_checknumber(L, 2);
+    int w = (int)luaL_checknumber(L, 3);
+    int h = (int)luaL_checknumber(L, 4);
     
     renderer_set_viewport(x, y, w, h);
     return 0;
