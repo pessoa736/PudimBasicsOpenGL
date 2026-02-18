@@ -182,6 +182,7 @@ void renderer_begin(int screen_width, int screen_height) {
 void renderer_flush(void) {
     if (state.vertex_count == 0) return;
     
+    glUseProgram(state.shader);
     glBindVertexArray(state.vao);
     glBindBuffer(GL_ARRAY_BUFFER, state.vbo);
     glBufferSubData(GL_ARRAY_BUFFER, 0, state.vertex_count * VERTEX_SIZE * sizeof(float), state.vertices);
@@ -326,4 +327,55 @@ void render_triangle_filled(int x1, int y1, int x2, int y2, int x3, int y3, Colo
     add_vertex((float)x1, (float)y1, color);
     add_vertex((float)x2, (float)y2, color);
     add_vertex((float)x3, (float)y3, color);
+}
+
+// --- UI Rendering (screen-space, ignores camera) ---
+
+void renderer_begin_ui(int screen_width, int screen_height) {
+    // Flush any pending world-space geometry first
+    renderer_flush();
+
+    // Build a plain orthographic projection (no camera transform)
+    float sw = (float)screen_width;
+    float sh = (float)screen_height;
+    float projection[16] = {
+         2.0f / sw,  0.0f,       0.0f, 0.0f,
+         0.0f,      -2.0f / sh,  0.0f, 0.0f,
+         0.0f,       0.0f,      -1.0f, 0.0f,
+        -1.0f,       1.0f,       0.0f, 1.0f
+    };
+
+    glUseProgram(state.shader);
+    glUniformMatrix4fv(state.projection_loc, 1, GL_FALSE, projection);
+}
+
+void renderer_end_ui(void) {
+    // Flush UI geometry
+    renderer_flush();
+
+    // Restore camera projection so subsequent draws use the camera again
+    float projection[16];
+    camera_get_matrix(projection, state.screen_width, state.screen_height);
+    glUseProgram(state.shader);
+    glUniformMatrix4fv(state.projection_loc, 1, GL_FALSE, projection);
+}
+
+// --- Gradient Rectangle ---
+
+void render_rect_gradient(int x, int y, int width, int height, Color top_color, Color bottom_color) {
+    set_mode(GL_TRIANGLES);
+    float fx = (float)x;
+    float fy = (float)y;
+    float fw = (float)width;
+    float fh = (float)height;
+
+    // First triangle (top-left, top-right, bottom-right)
+    add_vertex(fx,      fy,      top_color);
+    add_vertex(fx + fw, fy,      top_color);
+    add_vertex(fx + fw, fy + fh, bottom_color);
+
+    // Second triangle (top-left, bottom-right, bottom-left)
+    add_vertex(fx,      fy,      top_color);
+    add_vertex(fx + fw, fy + fh, bottom_color);
+    add_vertex(fx,      fy + fh, bottom_color);
 }

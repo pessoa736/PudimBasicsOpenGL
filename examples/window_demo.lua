@@ -1,6 +1,7 @@
 -- PudimBasicsGl Window Features Demo
 -- Demonstrates VSync, fullscreen, and window manipulation
 
+package.cpath = "./?.so;" .. package.cpath
 local pb = require("PudimBasicsGl")
 
 local WIDTH = 800
@@ -23,7 +24,8 @@ local last_fps_update = 0
 local current_fps = 0
 
 print("Controls:")
-print("  Press any key to toggle VSync")
+print("  V           : toggle VSync")
+print("  F           : toggle fullscreen")
 print("  Window is resizable")
 print("  Close window to exit")
 print("")
@@ -42,7 +44,24 @@ while not pb.window.should_close(window) do
         frame_count = 0
         last_fps_update = total_time
     end
-    
+
+    -- Toggle VSync with V key
+    if pb.input.is_key_pressed(pb.input.KEY_V) then
+        vsync_enabled = not vsync_enabled
+        pb.window.set_vsync(window, vsync_enabled)
+        print("VSync: " .. (vsync_enabled and "ON" or "OFF"))
+    end
+
+    -- Toggle fullscreen with F key
+    if pb.input.is_key_pressed(pb.input.KEY_F) then
+        pb.window.toggle_fullscreen(window)
+    end
+
+    -- ESC to quit
+    if pb.input.is_key_pressed(pb.input.KEY_ESCAPE) then
+        break
+    end
+
     -- Get current window size
     local w, h = pb.window.get_size(window)
     

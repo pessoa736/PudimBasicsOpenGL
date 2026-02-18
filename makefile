@@ -66,7 +66,9 @@ SRC = src/main.c \
       src/core/lua_audio.c \
       src/core/lua_text.c \
       src/core/lua_camera.c \
+      src/core/lua_shader.c \
       src/render/text.c \
+      src/render/shader.c \
       external/glad/src/glad.c
 
 INCLUDES = -Iexternal/glad/include -Iexternal -Isrc $(LUA_CFLAGS)

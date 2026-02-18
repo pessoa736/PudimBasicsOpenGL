@@ -168,7 +168,8 @@ static int l_renderer_set_line_width(lua_State* L) {
 
 // pudim.renderer.color(r, g, b, a?) -> table
 static int l_renderer_color(lua_State* L) {
-    float r, g, b, a = 1.0f;
+    float r, g, b, a;
+    a = 1.0f;
     
     if (lua_gettop(L) == 1 && lua_isinteger(L, 1)) {
         // Hex color
@@ -253,7 +254,40 @@ static int l_renderer_enable_blend(lua_State* L) {
     }
     return 0;
 }
+// pudim.renderer.begin_ui(width, height)
+// Start UI rendering mode (screen-space, ignores camera)
+static int l_renderer_begin_ui(lua_State* L) {
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2;
+    int w = (int)luaL_checkinteger(L, arg);
+    int h = (int)luaL_checkinteger(L, arg + 1);
+    renderer_begin_ui(w, h);
+    return 0;
+}
 
+// pudim.renderer.end_ui()
+// End UI rendering mode (restores camera projection)
+static int l_renderer_end_ui(lua_State* L) {
+    (void)L;
+    renderer_end_ui();
+    return 0;
+}
+
+// pudim.renderer.rect_gradient(x, y, w, h, top_r, top_g, top_b, top_a, bot_r, bot_g, bot_b, bot_a)
+// pudim.renderer.rect_gradient(x, y, w, h, top_color_table, bot_color_table)
+static int l_renderer_rect_gradient(lua_State* L) {
+    int arg = 1;
+    if (lua_istable(L, 1) && !lua_istable(L, 2)) arg = 2; // skip self
+    int x = (int)luaL_checknumber(L, arg);
+    int y = (int)luaL_checknumber(L, arg + 1);
+    int w = (int)luaL_checknumber(L, arg + 2);
+    int h = (int)luaL_checknumber(L, arg + 3);
+    Color top = get_color_from_lua(L, arg + 4);
+    int next_arg = lua_istable(L, arg + 4) ? arg + 5 : arg + 8;
+    Color bot = get_color_from_lua(L, next_arg);
+    render_rect_gradient(x, y, w, h, top, bot);
+    return 0;
+}
 // pudim.renderer.set_viewport(x, y, width, height)
 static int l_renderer_set_viewport(lua_State* L) {
     int x = (int)luaL_checknumber(L, 1);
@@ -269,16 +303,21 @@ static int l_renderer_set_viewport(lua_State* L) {
 static int l_renderer_get_info(lua_State* L) {
     lua_newtable(L);
     
-    lua_pushstring(L, (const char*)glGetString(GL_VERSION));
+    const char* s;
+    s = (const char*)glGetString(GL_VERSION);
+    lua_pushstring(L, s ? s : "unknown");
     lua_setfield(L, -2, "version");
     
-    lua_pushstring(L, (const char*)glGetString(GL_RENDERER));
+    s = (const char*)glGetString(GL_RENDERER);
+    lua_pushstring(L, s ? s : "unknown");
     lua_setfield(L, -2, "renderer");
     
-    lua_pushstring(L, (const char*)glGetString(GL_VENDOR));
+    s = (const char*)glGetString(GL_VENDOR);
+    lua_pushstring(L, s ? s : "unknown");
     lua_setfield(L, -2, "vendor");
     
-    lua_pushstring(L, (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    s = (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+    lua_pushstring(L, s ? s : "unknown");
     lua_setfield(L, -2, "glsl_version");
     
     return 1;
@@ -308,6 +347,9 @@ static const luaL_Reg renderer_funcs[] = {
     {"enable_blend", l_renderer_enable_blend},
     {"set_viewport", l_renderer_set_viewport},
     {"get_info", l_renderer_get_info},
+    {"begin_ui", l_renderer_begin_ui},
+    {"end_ui", l_renderer_end_ui},
+    {"rect_gradient", l_renderer_rect_gradient},
     {NULL, NULL}
 };
 

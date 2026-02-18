@@ -161,37 +161,24 @@ while not pb.window.should_close(window) do
 
     pb.renderer.flush()
 
-    -- ── HUD (reset camera so HUD stays on screen) ────────────────
+    -- ── HUD (screen-space UI, ignores camera) ─────────────────
 
-    -- Save camera state
-    local cam_x, cam_y = pb.camera.get_position()
-    local cam_z = pb.camera.get_zoom()
-    local cam_r = pb.camera.get_rotation()
-
-    -- Temporarily reset camera for screen-space HUD
-    pb.camera.reset()
-    -- Force a new batch with identity camera
-    pb.renderer.flush()
-    pb.renderer.begin(w, h)
+    pb.renderer.begin_ui(w, h)
 
     -- Background strip for HUD
     pb.renderer.rect_filled(0, 0, w, 20, { r = 0, g = 0, b = 0, a = 0.5 })
 
-    -- Status dots as simple visual indicators
     -- Zoom indicator bar
     local bar_x = 10
-    local bar_w = math.min(cam_z * 60, 200)
+    local cur_zoom = pb.camera.get_zoom()
+    local bar_w = math.min(cur_zoom * 60, 200)
     pb.renderer.rect_filled(bar_x, 5, bar_w, 10, { r = 0.3, g = 0.8, b = 0.3, a = 0.8 })
 
     -- Bottom-left help
     pb.renderer.rect_filled(0, h - 18, w, 18, { r = 0, g = 0, b = 0, a = 0.5 })
 
     pb.renderer.flush()
-
-    -- Restore camera
-    pb.camera.set_position(cam_x, cam_y)
-    pb.camera.set_zoom(cam_z)
-    pb.camera.set_rotation(cam_r)
+    pb.renderer.end_ui()
 
     pb.renderer.finish()
 

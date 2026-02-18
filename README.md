@@ -17,6 +17,7 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 - **Text**: Load TrueType fonts (.ttf) and render text with customizable size, color, and measurement via [stb_truetype](https://github.com/nothings/stb)
 - **Time**: Delta time, FPS, and timing utilities
 - **Camera**: 2D camera controls (position, zoom, rotation, look_at, screen/world conversion)
+- **Shader**: Custom GLSL shaders — compile from strings or load from files, set uniforms (int, float, vec2-4, mat4)
 
 ## Building
 
@@ -64,6 +65,10 @@ local snd = pb.audio.load("music.mp3")
 ---@type Font
 local font = pb.text.load("my_font.ttf", 32)
 -- `font:` will show text methods such as `draw`, `measure`, `set_size`, etc.
+
+---@type Shader
+local shd = pb.shader.create(vertex_src, fragment_src)
+-- `shd:` will show shader methods such as `use`, `set_float`, `set_vec3`, etc.
 ```
 
 
@@ -336,6 +341,30 @@ font:destroy()
 
 > **Note:** Call `pb.renderer.flush()` before drawing text, and `pb.text.flush()` before drawing primitives — they use different shaders.
 
+### pb.shader
+
+| Function | Description |
+|----------|-------------|
+| `create(vertex_src, fragment_src)` | Compile a shader from GLSL source strings, returns Shader |
+| `load(vertex_path, fragment_path)` | Load and compile shader from files, returns Shader |
+| `unuse()` | Unbind the current shader (restore default) |
+
+#### Shader Methods
+
+| Method | Description |
+|--------|-------------|
+| `shader:use()` | Bind this shader for rendering |
+| `shader:unuse()` | Unbind this shader |
+| `shader:set_int(name, value)` | Set an integer uniform |
+| `shader:set_float(name, value)` | Set a float uniform |
+| `shader:set_vec2(name, x, y)` | Set a vec2 uniform |
+| `shader:set_vec3(name, x, y, z)` | Set a vec3 uniform |
+| `shader:set_vec4(name, x, y, z, w)` | Set a vec4 uniform |
+| `shader:set_mat4(name, {m1..m16})` | Set a mat4 uniform (16 floats, column-major) |
+| `shader:get_id()` | Get the OpenGL program ID |
+| `shader:is_valid()` | Check if the shader compiled successfully |
+| `shader:destroy()` | Free shader GPU resources |
+
 ### pb.time
 
 | Function | Description |
@@ -367,6 +396,32 @@ font:destroy()
 Colors can be passed as:
 - Table: `{r=1.0, g=0.5, b=0.0, a=1.0}`
 - Individual values: `r, g, b, a` (alpha optional, defaults to 1.0)
+
+### Shader Example
+
+```lua
+-- Create a custom fragment shader
+local vs = [[
+#version 330 core
+layout(location = 0) in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+]]
+local fs = [[
+#version 330 core
+out vec4 FragColor;
+uniform float uTime;
+void main() {
+    FragColor = vec4(sin(uTime)*0.5+0.5, 0.3, 0.8, 1.0);
+}
+]]
+
+local shader = pb.shader.create(vs, fs)
+shader:use()
+shader:set_float("uTime", pb.time.get())
+-- draw geometry ...
+shader:unuse()
+shader:destroy()
+```
 
 ## Examples
 
@@ -435,6 +490,7 @@ local pb = require("PudimBasicsGl")
 - `examples/oop_demo.lua` - Object-oriented style API demo
 - `examples/text_demo.lua` - Text rendering and font loading demo
 - `examples/camera_demo.lua` - 2D camera pan, zoom, rotation and coordinate conversion demo
+- `examples/shader_demo.lua` - Custom GLSL shader with animated color wave effect
 - `examples/api_reference.lua` - Complete API reference example
 ## Command-line tool (pbgl)
 

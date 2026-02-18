@@ -51,4 +51,11 @@ void render_triangle_filled(int x1, int y1, int x2, int y2, int x3, int y3, Colo
 void render_set_point_size(float size);
 void render_set_line_width(float width);
 
+// UI rendering (screen-space, ignores camera)
+void renderer_begin_ui(int screen_width, int screen_height);
+void renderer_end_ui(void);
+
+// Gradient rectangle
+void render_rect_gradient(int x, int y, int width, int height, Color top_color, Color bottom_color);
+
 #endif // RENDERER_H

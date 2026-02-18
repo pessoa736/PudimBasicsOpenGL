@@ -15,6 +15,7 @@
 ---@field audio PudimBasicsGl.audio Audio loading and playback module
 ---@field text PudimBasicsGl.text Text rendering and font module
 ---@field camera PudimBasicsGl.camera 2D camera module
+---@field shader PudimBasicsGl.shader Custom shader module
 local PudimBasicsGl = {}
 
 --------------------------------------------------------------------------------
@@ -345,6 +346,32 @@ function PudimBasicsGl.renderer.set_viewport(x, y, width, height) end
 ---@return table info Table with version, renderer, vendor, glsl_version
 function PudimBasicsGl.renderer.get_info() end
 
+---Start UI rendering mode (screen-space, ignores camera)
+---Everything drawn between begin_ui() and end_ui() stays fixed on screen.
+---Useful for HUD, health bars, score, menus, etc.
+---@param width integer Screen width
+---@param height integer Screen height
+function PudimBasicsGl.renderer.begin_ui(width, height) end
+
+---End UI rendering mode and restore camera projection
+function PudimBasicsGl.renderer.end_ui() end
+
+---Draw a filled rectangle with a vertical gradient (top color to bottom color)
+---@param x integer X position
+---@param y integer Y position
+---@param width integer Rectangle width
+---@param height integer Rectangle height
+---@param top_r number|table Top color red (0.0-1.0) or color table {r,g,b,a}
+---@param top_g? number Top color green (0.0-1.0)
+---@param top_b? number Top color blue (0.0-1.0)
+---@param top_a? number Top color alpha (0.0-1.0)
+---@param bot_r? number|table Bottom color red (0.0-1.0) or color table {r,g,b,a}
+---@param bot_g? number Bottom color green (0.0-1.0)
+---@param bot_b? number Bottom color blue (0.0-1.0)
+---@param bot_a? number Bottom color alpha (0.0-1.0)
+---@overload fun(x: integer, y: integer, width: integer, height: integer, top_color: table, bottom_color: table)
+function PudimBasicsGl.renderer.rect_gradient(x, y, width, height, top_r, top_g, top_b, top_a, bot_r, bot_g, bot_b, bot_a) end
+
 --------------------------------------------------------------------------------
 -- Texture Module
 --------------------------------------------------------------------------------
@@ -671,5 +698,43 @@ function PudimBasicsGl.camera.screen_to_world(sx, sy) end
 ---@return number sx Screen X coordinate
 ---@return number sy Screen Y coordinate
 function PudimBasicsGl.camera.world_to_screen(wx, wy) end
+
+--------------------------------------------------------------------------------
+-- Shader Module
+--------------------------------------------------------------------------------
+
+---@class Shader
+---Opaque shader program handle (userdata)
+---@field use fun(self: Shader) Bind this shader for rendering
+---@field unuse fun(self: Shader) Unbind the shader (restore no program)
+---@field set_int fun(self: Shader, name: string, value: integer) Set an integer uniform
+---@field set_float fun(self: Shader, name: string, value: number) Set a float uniform
+---@field set_vec2 fun(self: Shader, name: string, x: number, y: number) Set a vec2 uniform
+---@field set_vec3 fun(self: Shader, name: string, x: number, y: number, z: number) Set a vec3 uniform
+---@field set_vec4 fun(self: Shader, name: string, x: number, y: number, z: number, w: number) Set a vec4 uniform
+---@field set_mat4 fun(self: Shader, name: string, matrix: number[]) Set a mat4 uniform (16 floats in column-major order)
+---@field get_id fun(self: Shader): integer Get the OpenGL program ID
+---@field is_valid fun(self: Shader): boolean Check if the shader is valid
+---@field destroy fun(self: Shader) Destroy the shader and free GPU resources
+
+---@class PudimBasicsGl.shader
+PudimBasicsGl.shader = {}
+
+---Create a shader program from vertex and fragment source strings
+---@param vertex_src string GLSL vertex shader source code
+---@param fragment_src string GLSL fragment shader source code
+---@return Shader? shader The compiled shader program, or nil on failure
+---@return string? error Error message if compilation/linking failed
+function PudimBasicsGl.shader.create(vertex_src, fragment_src) end
+
+---Load a shader program from vertex and fragment source files
+---@param vertex_path string Path to the vertex shader file
+---@param fragment_path string Path to the fragment shader file
+---@return Shader? shader The compiled shader program, or nil on failure
+---@return string? error Error message if loading/compilation failed
+function PudimBasicsGl.shader.load(vertex_path, fragment_path) end
+
+---Unbind the current shader (restore no program)
+function PudimBasicsGl.shader.unuse() end
 
 return PudimBasicsGl

@@ -142,6 +142,10 @@ void texture_renderer_shutdown(void) {
 void texture_renderer_flush(void) {
     if (tex_state.vertex_count == 0 || !tex_state.initialized) return;
     
+    // Enable alpha blending for transparent textures (PNG, etc.)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
     // Create projection * view matrix (incorporates camera transform)
     float projection[16];
     camera_get_matrix(projection, tex_state.screen_width, tex_state.screen_height);

@@ -33,6 +33,7 @@ extern void lua_register_input_api(lua_State* L);
 extern void lua_register_audio_api(lua_State* L);
 extern void lua_register_text_api(lua_State* L);
 extern void lua_register_camera_api(lua_State* L);
+extern void lua_register_shader_api(lua_State* L);
 
 // Module entry point - called when require("PudimBasicsGl") is used
 int luaopen_PudimBasicsGl(lua_State* L) {
@@ -52,6 +53,7 @@ int luaopen_PudimBasicsGl(lua_State* L) {
     lua_register_audio_api(L);
     lua_register_text_api(L);
     lua_register_camera_api(L);
+    lua_register_shader_api(L);
     
     // Return the PudimBasicsGl table
     return 1;

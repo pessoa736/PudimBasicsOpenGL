@@ -1,6 +1,8 @@
+#define _POSIX_C_SOURCE 200809L
 #include "window.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <glad/glad.h>
 
 #ifdef __linux__
@@ -86,7 +88,7 @@ Window* window_create(int width, int height, const char* title) {
     
     window->width = width;
     window->height = height;
-    window->title = title;
+    window->title = NULL;  // Set via window_set_title below
     window->is_fullscreen = 0;
     window->windowed_x = 0;
     window->windowed_y = 0;
@@ -116,6 +118,9 @@ Window* window_create(int width, int height, const char* title) {
     
     glViewport(0, 0, width, height);
     
+    // Store a copy of the title string (caller's string may be freed)
+    window->title = strdup(title);
+
     printf("OpenGL %s\n", glGetString(GL_VERSION));
     printf("GLSL %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
     printf("Renderer: %s\n", glGetString(GL_RENDERER));
@@ -127,7 +132,10 @@ void window_destroy(Window* window) {
     if (window) {
         if (window->handle) {
             glfwDestroyWindow(window->handle);
+            window->handle = NULL;
         }
+        free((void*)window->title);
+        window->title = NULL;
         free(window);
     }
     glfwTerminate();
@@ -213,7 +221,8 @@ void window_get_position(Window* window, int* x, int* y) {
 
 void window_set_title(Window* window, const char* title) {
     glfwSetWindowTitle(window->handle, title);
-    window->title = title;
+    free((void*)window->title);
+    window->title = strdup(title);
 }
 
 void window_set_resize_callback(Window* window, WindowResizeCallback callback, void* user_data) {

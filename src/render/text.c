@@ -142,6 +142,10 @@ void text_renderer_shutdown(void) {
 void text_renderer_flush(void) {
     if (text_state.vertex_count == 0 || !text_state.initialized) return;
 
+    // Enable alpha blending for text rendering
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // Create projection * view matrix (incorporates camera transform)
     float projection[16];
     camera_get_matrix(projection, text_state.screen_width, text_state.screen_height);

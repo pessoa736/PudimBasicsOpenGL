@@ -65,6 +65,11 @@ static int l_texture_create(lua_State* L) {
     if (lua_istable(L, arg + 2)) {
         int size = width * height * 4;
         data = (unsigned char*)malloc(size);
+        if (!data) {
+            lua_pushnil(L);
+            lua_pushstring(L, "Failed to allocate texture data");
+            return 2;
+        }
         for (int i = 0; i < size; i++) {
             lua_rawgeti(L, arg + 2, i + 1);
             data[i] = (unsigned char)lua_tointeger(L, -1);

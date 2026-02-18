@@ -15,6 +15,7 @@ Uma biblioteca 2D mínima para Lua usando OpenGL. O PudimBasicsGl foca no essenc
 - **Texto**: Carregamento de fontes TrueType (.ttf) e renderização de texto com tamanho, cor e medição personalizáveis via [stb_truetype](https://github.com/nothings/stb)
 - **Tempo**: Delta time, FPS e utilitários de tempo
 - **Câmera**: Controles de câmera 2D (posição, zoom, rotação, look_at e conversão tela/mundo)
+- **Shader**: Shaders GLSL customizados — compile de strings ou carregue de arquivos, defina uniforms (int, float, vec2-4, mat4)
 
 ## Compilação
 
@@ -307,6 +308,30 @@ font:destroy()
 
 > **Nota:** Chame `pb.renderer.flush()` antes de desenhar texto, e `pb.text.flush()` antes de desenhar primitivas — eles usam shaders diferentes.
 
+### pb.shader
+
+| Função | Descrição |
+|--------|-----------|
+| `create(vertex_src, fragment_src)` | Compila shader de strings GLSL, retorna Shader |
+| `load(vertex_path, fragment_path)` | Carrega e compila shader de arquivos, retorna Shader |
+| `unuse()` | Desativa o shader atual (restaura padrão) |
+
+#### Métodos do Shader
+
+| Método | Descrição |
+|--------|-----------|
+| `shader:use()` | Ativa este shader para renderização |
+| `shader:unuse()` | Desativa este shader |
+| `shader:set_int(name, value)` | Define um uniform inteiro |
+| `shader:set_float(name, value)` | Define um uniform float |
+| `shader:set_vec2(name, x, y)` | Define um uniform vec2 |
+| `shader:set_vec3(name, x, y, z)` | Define um uniform vec3 |
+| `shader:set_vec4(name, x, y, z, w)` | Define um uniform vec4 |
+| `shader:set_mat4(name, {m1..m16})` | Define um uniform mat4 (16 floats, column-major) |
+| `shader:get_id()` | Retorna o ID do programa OpenGL |
+| `shader:is_valid()` | Verifica se o shader compilou com sucesso |
+| `shader:destroy()` | Libera recursos GPU do shader |
+
 ### pb.time
 
 | Função | Descrição |
@@ -338,6 +363,32 @@ font:destroy()
 Cores podem ser passadas como:
 - Tabela: `{r=1.0, g=0.5, b=0.0, a=1.0}`
 - Valores individuais: `r, g, b, a` (alpha opcional, padrão 1.0)
+
+### Exemplo de Shader
+
+```lua
+-- Cria um fragment shader customizado
+local vs = [[
+#version 330 core
+layout(location = 0) in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+]]
+local fs = [[
+#version 330 core
+out vec4 FragColor;
+uniform float uTime;
+void main() {
+    FragColor = vec4(sin(uTime)*0.5+0.5, 0.3, 0.8, 1.0);
+}
+]]
+
+local shader = pb.shader.create(vs, fs)
+shader:use()
+shader:set_float("uTime", pb.time.get())
+-- desenha geometria ...
+shader:unuse()
+shader:destroy()
+```
 
 ## Dependências
 
@@ -390,6 +441,7 @@ local pb = require("PudimBasicsGl")
 - `examples/oop_demo.lua` - Demo com estilo orientado a objetos
 - `examples/text_demo.lua` - Demo de renderização de texto e carregamento de fontes
 - `examples/camera_demo.lua` - Demo de câmera 2D: pan, zoom, rotação e conversão de coordenadas
+- `examples/shader_demo.lua` - Shader GLSL customizado com efeito de onda de cor animada
 - `examples/api_reference.lua` - Exemplo completo de referência da API
 
 ## Ferramenta de linha de comando (pbgl)

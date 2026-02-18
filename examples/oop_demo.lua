@@ -1,4 +1,5 @@
 -- OOP-style demo: window:should_close(), texture:draw(), time:update(), renderer calls
+package.cpath = "./?.so;" .. package.cpath
 ---@type PudimBasicsGl
 local pb = require('PudimBasicsGl')
 
@@ -56,5 +57,5 @@ while not win:should_close() do
 end
 
 -- Cleanup
-pb.texture.destroy(tex)
-pb.window.destroy(win)
+tex:destroy()
+win:destroy()
