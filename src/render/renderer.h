@@ -55,7 +55,27 @@ void render_set_line_width(float width);
 void renderer_begin_ui(int screen_width, int screen_height);
 void renderer_end_ui(void);
 
+// Shared rendering state — queried by text/texture renderers
+int renderer_is_ui_mode(void);
+void renderer_get_ui_projection(float* out, int screen_width, int screen_height);
+
+// Active batch tracking — ensures correct draw order across renderers
+typedef enum {
+    BATCH_NONE = 0,
+    BATCH_PRIMITIVES,
+    BATCH_TEXTURES,
+    BATCH_TEXT
+} ActiveBatchType;
+
+// Call before adding geometry to a batch. Automatically flushes the previous
+// batch if a different renderer was active, preserving painter's-algorithm order.
+void renderer_switch_batch(ActiveBatchType new_batch);
+
 // Gradient rectangle
 void render_rect_gradient(int x, int y, int width, int height, Color top_color, Color bottom_color);
+
+// Read a pixel from the framebuffer (for testing / color picking)
+// Returns RGBA values in the range 0-255. Coordinates are screen-space.
+void renderer_read_pixel(int x, int y, int screen_height, unsigned char* r, unsigned char* g, unsigned char* b, unsigned char* a);
 
 #endif // RENDERER_H

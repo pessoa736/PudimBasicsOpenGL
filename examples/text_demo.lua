@@ -13,7 +13,7 @@ pb.renderer.init()
 
 -- Load fonts at different sizes
 -- Replace with the path to a .ttf font on your system
-local font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+local font_path = "/usr/share/fonts/noto/NotoSans-Regular.ttf"
 
 local font_small = pb.text.load(font_path, 16)
 if not font_small then

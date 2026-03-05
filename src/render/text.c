@@ -3,6 +3,7 @@
 
 #include "text.h"
 #include "camera.h"
+#include "renderer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@ static const char* text_fragment_shader_source =
     "void main() {\n"
     "    float alpha = texture(fontAtlas, TexCoord).r;\n"
     "    FragColor = vec4(Color.rgb, Color.a * alpha);\n"
+    "    if (FragColor.a < 0.01) discard;\n"
     "}\n";
 
 // Text renderer state
@@ -146,9 +148,13 @@ void text_renderer_flush(void) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Create projection * view matrix (incorporates camera transform)
+    // Get the correct projection matrix (UI mode = plain ortho, otherwise camera)
     float projection[16];
-    camera_get_matrix(projection, text_state.screen_width, text_state.screen_height);
+    if (renderer_is_ui_mode()) {
+        renderer_get_ui_projection(projection, text_state.screen_width, text_state.screen_height);
+    } else {
+        camera_get_matrix(projection, text_state.screen_width, text_state.screen_height);
+    }
 
     glUseProgram(text_state.shader);
     glUniformMatrix4fv(text_state.projection_loc, 1, GL_FALSE, projection);
@@ -378,6 +384,7 @@ int font_set_size(Font* font, float size) {
 void render_text(Font* font, const char* text, float x, float y, Color color) {
     if (!font || !text || !text_state.initialized) return;
 
+    renderer_switch_batch(BATCH_TEXT);
     ensure_font_texture(font->texture_id);
 
     float cursor_x = x;

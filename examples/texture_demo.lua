@@ -1,6 +1,7 @@
 -- PudimBasicsGl Texture Demo
 -- This example demonstrates texture loading, drawing, and the new window features
 
+package.cpath = "./?.so;" .. package.cpath
 local pb = require("PudimBasicsGl")
 
 local WIDTH = 800

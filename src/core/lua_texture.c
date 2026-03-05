@@ -48,6 +48,42 @@ static int l_texture_load(lua_State* L) {
     return 1;
 }
 
+// PudimBasicsGl.texture.load_with_colorkey(filepath, r, g, b) -> Texture
+static int l_texture_load_with_colorkey(lua_State* L) {
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2; // allow pb.texture:load_with_colorkey(path, r, g, b)
+    
+    const char* filepath = luaL_checkstring(L, arg);
+    
+    // Accept color key as integers 0-255 or optionally a color table (TODO maybe just integers for simplicity)
+    // To match typical Lua 2D frameworks, we expect 0-255 integers for exact chroma key matches.
+    int r = (int)luaL_checknumber(L, arg + 1);
+    int g = (int)luaL_checknumber(L, arg + 2);
+    int b = (int)luaL_checknumber(L, arg + 3);
+    
+    // Clamp
+    if (r < 0) r = 0; if (r > 255) r = 255;
+    if (g < 0) g = 0; if (g > 255) g = 255;
+    if (b < 0) b = 0; if (b > 255) b = 255;
+    
+    ensure_texture_renderer_init();
+    
+    Texture* tex = texture_load_with_colorkey(filepath, (unsigned char)r, (unsigned char)g, (unsigned char)b);
+    if (!tex) {
+        lua_pushnil(L);
+        lua_pushstring(L, "Failed to load texture with colorkey");
+        return 2;
+    }
+    
+    Texture** udata = (Texture**)lua_newuserdata(L, sizeof(Texture*));
+    *udata = tex;
+    
+    luaL_getmetatable(L, TEXTURE_METATABLE);
+    lua_setmetatable(L, -2);
+    
+    return 1;
+}
+
 // PudimBasicsGl.texture.create(width, height, data?) -> Texture
 // Accept optional self when called as module:create(width, height, data?)
 static int l_texture_create(lua_State* L) {
@@ -278,6 +314,7 @@ static const luaL_Reg texture_methods[] = {
 // Module functions
 static const luaL_Reg texture_functions[] = {
     {"load", l_texture_load},
+    {"load_with_colorkey", l_texture_load_with_colorkey},
     {"create", l_texture_create},
     {"flush", l_texture_flush},
     {NULL, NULL}

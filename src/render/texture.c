@@ -3,6 +3,7 @@
 
 #include "texture.h"
 #include "camera.h"
+#include "renderer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +33,7 @@ static const char* texture_fragment_shader_source =
     "void main() {\n"
     "    vec4 texColor = texture(textureSampler, TexCoord);\n"
     "    FragColor = texColor * Color;\n"
+    "    if (FragColor.a < 0.001) discard;\n"
     "}\n";
 
 // Texture renderer state
@@ -146,10 +148,14 @@ void texture_renderer_flush(void) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-    // Create projection * view matrix (incorporates camera transform)
+    // Get the correct projection matrix (UI mode = plain ortho, otherwise camera)
     float projection[16];
-    camera_get_matrix(projection, tex_state.screen_width, tex_state.screen_height);
-    
+    if (renderer_is_ui_mode()) {
+        renderer_get_ui_projection(projection, tex_state.screen_width, tex_state.screen_height);
+    } else {
+        camera_get_matrix(projection, tex_state.screen_width, tex_state.screen_height);
+    }
+
     glUseProgram(tex_state.shader);
     glUniformMatrix4fv(tex_state.projection_loc, 1, GL_FALSE, projection);
     glUniform1i(tex_state.texture_loc, 0);
@@ -219,6 +225,35 @@ Texture* texture_load(const char* filepath) {
     return texture;
 }
 
+Texture* texture_load_with_colorkey(const char* filepath, unsigned char r, unsigned char g, unsigned char b) {
+    stbi_set_flip_vertically_on_load(0);
+    
+    int width, height, channels;
+    unsigned char* data = stbi_load(filepath, &width, &height, &channels, 4); // Force RGBA
+    
+    if (!data) {
+        fprintf(stderr, "[Texture] Failed to load: %s - %s\n", filepath, stbi_failure_reason());
+        return NULL;
+    }
+    
+    // Apply chroma key (make matching pixels fully transparent)
+    for (int i = 0; i < width * height * 4; i += 4) {
+        if (data[i] == r && data[i+1] == g && data[i+2] == b) {
+            data[i+3] = 0;
+        }
+    }
+    
+    Texture* texture = texture_create(width, height, data);
+    stbi_image_free(data);
+    
+    if (texture) {
+        texture->channels = channels;
+        printf("[Texture] Loaded with colorkey: %s (%dx%d)\n", filepath, width, height);
+    }
+    
+    return texture;
+}
+
 Texture* texture_create(int width, int height, unsigned char* data) {
     Texture* texture = (Texture*)malloc(sizeof(Texture));
     if (!texture) return NULL;
@@ -269,6 +304,7 @@ void render_texture_tinted(Texture* texture, int x, int y, int width, int height
                            float r, float g, float b, float a) {
     if (!texture || !tex_state.initialized) return;
     
+    renderer_switch_batch(BATCH_TEXTURES);
     ensure_texture(texture->id);
     
     float fx = (float)x;
@@ -300,6 +336,7 @@ void render_texture_ex(Texture* texture, int x, int y, int width, int height,
                        float r, float g, float b, float a) {
     if (!texture || !tex_state.initialized) return;
     
+    renderer_switch_batch(BATCH_TEXTURES);
     ensure_texture(texture->id);
     
     float fw = (float)width;
@@ -358,6 +395,7 @@ void render_texture_region_ex(Texture* texture,
                               float r, float g, float b, float a) {
     if (!texture || !tex_state.initialized) return;
     
+    renderer_switch_batch(BATCH_TEXTURES);
     ensure_texture(texture->id);
     
     float fw = (float)width;

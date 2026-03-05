@@ -2,6 +2,7 @@
 -- This example demonstrates custom shader creation and uniform control
 -- A full-screen quad with an animated color wave effect
 
+package.cpath = "./?.so;" .. package.cpath
 local pb = require("PudimBasicsGl")
 
 local WIDTH = 800

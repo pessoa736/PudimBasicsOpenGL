@@ -17,6 +17,27 @@ end
 -- Initialize renderer
 pb.renderer.init()
 
+-- Helper function: HSV to RGB conversion
+local function hsv_to_rgb(h, s, v)
+    if s == 0 then return v, v, v end
+    
+    h = h * 6
+    local i = math.floor(h)
+    local f = h - i
+    local p = v * (1 - s)
+    local q = v * (1 - s * f)
+    local t = v * (1 - s * (1 - f))
+    
+    i = i % 6
+    if i == 0 then return v, t, p
+    elseif i == 1 then return q, v, p
+    elseif i == 2 then return p, v, t
+    elseif i == 3 then return p, q, v
+    elseif i == 4 then return t, p, v
+    else return v, p, q
+    end
+end
+
 -- State
 local vsync_enabled = pb.window.get_vsync(window)
 local frame_count = 0
@@ -136,24 +157,3 @@ end
 -- Cleanup
 pb.window.destroy(window)
 print("Demo finished!")
-
--- Helper function: HSV to RGB conversion
-function hsv_to_rgb(h, s, v)
-    if s == 0 then return v, v, v end
-    
-    h = h * 6
-    local i = math.floor(h)
-    local f = h - i
-    local p = v * (1 - s)
-    local q = v * (1 - s * f)
-    local t = v * (1 - s * (1 - f))
-    
-    i = i % 6
-    if i == 0 then return v, t, p
-    elseif i == 1 then return q, v, p
-    elseif i == 2 then return p, v, t
-    elseif i == 3 then return p, q, v
-    elseif i == 4 then return t, p, v
-    else return v, p, q
-    end
-end

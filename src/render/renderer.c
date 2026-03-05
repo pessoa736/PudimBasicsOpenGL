@@ -7,9 +7,11 @@
 
 // External function from texture.c
 extern void texture_renderer_set_screen_size(int width, int height);
+extern void texture_renderer_flush(void);
 
 // External function from text.c
 extern void text_renderer_set_screen_size(int width, int height);
+extern void text_renderer_flush(void);
 
 // Shader sources
 static const char* vertex_shader_src = 
@@ -50,6 +52,9 @@ typedef struct {
 } RendererState;
 
 static RendererState state = {0};
+
+// Active batch tracking for draw-order preservation across renderers
+static ActiveBatchType g_active_batch = BATCH_NONE;
 
 // Shader compilation helper
 static GLuint compile_shader(GLenum type, const char* source) {
@@ -133,8 +138,8 @@ void renderer_init(void) {
     glBindVertexArray(0);
     
     // Enable features
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);  // Don't write to depth buffer (2D engine)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_PROGRAM_POINT_SIZE);
@@ -153,7 +158,7 @@ void renderer_shutdown(void) {
 
 void renderer_clear(float r, float g, float b, float a) {
     glClearColor(r, g, b, a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void renderer_set_viewport(int x, int y, int width, int height) {
@@ -164,6 +169,7 @@ void renderer_begin(int screen_width, int screen_height) {
     state.screen_width = screen_width;
     state.screen_height = screen_height;
     state.vertex_count = 0;
+    g_active_batch = BATCH_NONE;
     
     // Update texture renderer screen size too
     texture_renderer_set_screen_size(screen_width, screen_height);
@@ -217,6 +223,7 @@ static void add_vertex(float x, float y, Color color) {
 }
 
 static void set_mode(GLenum mode) {
+    renderer_switch_batch(BATCH_PRIMITIVES);
     if (state.current_mode != mode) {
         renderer_flush();
         state.current_mode = mode;
@@ -329,29 +336,75 @@ void render_triangle_filled(int x1, int y1, int x2, int y2, int x3, int y3, Colo
     add_vertex((float)x3, (float)y3, color);
 }
 
+// --- Active batch tracking (draw-order preservation) ---
+
+void renderer_switch_batch(ActiveBatchType new_batch) {
+    if (g_active_batch == new_batch) return;
+
+    // Flush the previously-active batch so its geometry renders first
+    switch (g_active_batch) {
+        case BATCH_PRIMITIVES: renderer_flush(); break;
+        case BATCH_TEXTURES:   texture_renderer_flush(); break;
+        case BATCH_TEXT:        text_renderer_flush(); break;
+        default: break;
+    }
+
+    g_active_batch = new_batch;
+}
+
+// --- Shared UI mode state ---
+
+static int g_ui_mode = 0;
+
+int renderer_is_ui_mode(void) {
+    return g_ui_mode;
+}
+
+void renderer_get_ui_projection(float* out, int screen_width, int screen_height) {
+    float sw = (float)screen_width;
+    float sh = (float)screen_height;
+    // Plain orthographic projection (no camera transform)
+    out[0]  =  2.0f / sw; out[1]  =  0.0f;       out[2]  = 0.0f;  out[3]  = 0.0f;
+    out[4]  =  0.0f;      out[5]  = -2.0f / sh;  out[6]  = 0.0f;  out[7]  = 0.0f;
+    out[8]  =  0.0f;      out[9]  =  0.0f;       out[10] = -1.0f; out[11] = 0.0f;
+    out[12] = -1.0f;      out[13] =  1.0f;       out[14] =  0.0f; out[15] = 1.0f;
+}
+
 // --- UI Rendering (screen-space, ignores camera) ---
 
 void renderer_begin_ui(int screen_width, int screen_height) {
     // Flush any pending world-space geometry first
     renderer_flush();
+    texture_renderer_flush();
+    text_renderer_flush();
+    g_active_batch = BATCH_NONE;
+
+    // Enter UI mode
+    g_ui_mode = 1;
+
+    // Update screen dimensions for ALL renderers
+    state.screen_width = screen_width;
+    state.screen_height = screen_height;
+    texture_renderer_set_screen_size(screen_width, screen_height);
+    text_renderer_set_screen_size(screen_width, screen_height);
 
     // Build a plain orthographic projection (no camera transform)
-    float sw = (float)screen_width;
-    float sh = (float)screen_height;
-    float projection[16] = {
-         2.0f / sw,  0.0f,       0.0f, 0.0f,
-         0.0f,      -2.0f / sh,  0.0f, 0.0f,
-         0.0f,       0.0f,      -1.0f, 0.0f,
-        -1.0f,       1.0f,       0.0f, 1.0f
-    };
+    float projection[16];
+    renderer_get_ui_projection(projection, screen_width, screen_height);
 
     glUseProgram(state.shader);
     glUniformMatrix4fv(state.projection_loc, 1, GL_FALSE, projection);
 }
 
 void renderer_end_ui(void) {
-    // Flush UI geometry
+    // Flush ALL UI geometry
     renderer_flush();
+    texture_renderer_flush();
+    text_renderer_flush();
+    g_active_batch = BATCH_NONE;
+
+    // Exit UI mode
+    g_ui_mode = 0;
 
     // Restore camera projection so subsequent draws use the camera again
     float projection[16];
@@ -378,4 +431,17 @@ void render_rect_gradient(int x, int y, int width, int height, Color top_color, 
     add_vertex(fx,      fy,      top_color);
     add_vertex(fx + fw, fy + fh, bottom_color);
     add_vertex(fx,      fy + fh, bottom_color);
+}
+
+// --- Read Pixel (framebuffer readback) ---
+
+void renderer_read_pixel(int x, int y, int screen_height, unsigned char* r, unsigned char* g, unsigned char* b, unsigned char* a) {
+    // OpenGL has origin at bottom-left, flip Y
+    int gl_y = screen_height - 1 - y;
+    unsigned char pixel[4] = {0, 0, 0, 255};
+    glReadPixels(x, gl_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
+    *r = pixel[0];
+    *g = pixel[1];
+    *b = pixel[2];
+    *a = pixel[3];
 }

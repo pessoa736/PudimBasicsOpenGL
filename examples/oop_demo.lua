@@ -59,3 +59,4 @@ end
 -- Cleanup
 tex:destroy()
 win:destroy()
+win:destroy()

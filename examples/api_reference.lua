@@ -62,6 +62,7 @@
     pb.texture
     ----------
     pb.texture.load(filepath)                 -> Texture | nil, error
+    pb.texture.load_with_colorkey(filepath, r, g, b) -> Texture | nil, error
     pb.texture.create(w, h, data?)            -> Texture | nil, error
     pb.texture.flush()                        -- Flush pending texture draws
     -- Texture methods:
@@ -176,6 +177,22 @@
     pb.math.vec_normalize(v)                   -> vector
     pb.math.vec_dot(v1, v2)                    -> number
     -- Constants: pb.math.PI, pb.math.TAU, pb.math.HALF_PI
+
+    pb.studio
+    ---------
+    pb.studio.list_dir(path)                   -> string[] | nil, error
+    pb.studio.get_file_modified_time(path)     -> integer | nil
+    pb.studio.copy_file(src, dest)             -> boolean, error?
+
+    pb.ui
+    -----
+    pb.ui.set_font(font)                       -- Set the font used by UI widgets
+    pb.ui.begin_frame()                        -- Begin UI frame (reads mouse state)
+    pb.ui.end_frame()                          -- End UI frame (flushes draws)
+    pb.ui.label(text, x, y, r?, g?, b?, a?)    -- Draw a text label
+    pb.ui.panel(title, x, y, w, h)            -- Draw a panel with title bar
+    pb.ui.button(id, label, x, y, w, h, r?, g?, b?) -> boolean (clicked)
+    pb.ui.slider(id, label, x, y, w, h, val, min, max) -> number (value)
 ]]
 
 -- Example: Color cycling demo with gradient and UI overlay

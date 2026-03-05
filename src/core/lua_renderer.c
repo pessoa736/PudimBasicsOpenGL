@@ -323,6 +323,22 @@ static int l_renderer_get_info(lua_State* L) {
     return 1;
 }
 
+// pudim.renderer.read_pixel(x, y, screen_height) -> r, g, b, a (0-255)
+static int l_renderer_read_pixel(lua_State* L) {
+    int arg = 1;
+    if (lua_istable(L, 1)) arg = 2;
+    int x = (int)luaL_checknumber(L, arg);
+    int y = (int)luaL_checknumber(L, arg + 1);
+    int sh = (int)luaL_checknumber(L, arg + 2);
+    unsigned char r, g, b, a;
+    renderer_read_pixel(x, y, sh, &r, &g, &b, &a);
+    lua_pushinteger(L, r);
+    lua_pushinteger(L, g);
+    lua_pushinteger(L, b);
+    lua_pushinteger(L, a);
+    return 4;
+}
+
 static const luaL_Reg renderer_funcs[] = {
     {"init", l_renderer_init},
     {"clear", l_renderer_clear},
@@ -350,6 +366,7 @@ static const luaL_Reg renderer_funcs[] = {
     {"begin_ui", l_renderer_begin_ui},
     {"end_ui", l_renderer_end_ui},
     {"rect_gradient", l_renderer_rect_gradient},
+    {"read_pixel", l_renderer_read_pixel},
     {NULL, NULL}
 };
 

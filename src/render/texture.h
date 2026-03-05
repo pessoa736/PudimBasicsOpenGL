@@ -13,6 +13,9 @@ typedef struct {
 // Load texture from file (PNG, JPG, BMP, etc.)
 Texture* texture_load(const char* filepath);
 
+// Load texture with a specific color key (chroma key) set to transparent
+Texture* texture_load_with_colorkey(const char* filepath, unsigned char r, unsigned char g, unsigned char b);
+
 // Create texture from raw RGBA data
 Texture* texture_create(int width, int height, unsigned char* data);
 

@@ -4,7 +4,7 @@
 
 **PudimBasicsGl** is a minimal 2D graphics library for Lua, written in C17, using OpenGL 3.3 Core. It compiles to a shared library (`PudimBasicsGl.so` / `.dll`) loaded via Lua's `require("PudimBasicsGl")`. The project targets **Lua 5.4 / 5.5** and runs on **Linux** and **Windows (MinGW/MSYS2)**.
 
-The library exposes a global `PudimBasicsGl` table with sub-modules: `window`, `renderer`, `texture`, `input`, `audio`, `time`, and `math`. The user controls the main loop — there is no framework-imposed game loop.
+The library exposes a global `PudimBasicsGl` table with 12 sub-modules: `window`, `renderer`, `texture`, `input`, `audio`, `time`, `text`, `camera`, `shader`, `math`, `studio`, and `ui`. The user controls the main loop — there is no framework-imposed game loop.
 
 GitHub repository: `pessoa736/PudimBasicsOpenGL`  
 License: MIT  
@@ -25,17 +25,27 @@ src/
 │   ├── lua_time.c          # pb.time.* — Stateless timing functions
 │   ├── lua_audio.c         # pb.audio.* — Sound userdata + metatable
 │   ├── lua_text.c          # pb.text.* — Font userdata + metatable
-│   └── lua_math.c          # pb.math.* — Utility math functions
+│   ├── lua_camera.c        # pb.camera.* — Stateless 2D camera functions
+│   ├── lua_shader.c        # pb.shader.* — Shader userdata + metatable
+│   ├── lua_math.c          # pb.math.* — Vector math + utility functions
+│   ├── lua_studio.c        # pb.studio.* — File system utilities
+│   └── lua_ui.c            # pb.ui.* — Immediate-mode GUI widgets
 ├── platform/
 │   ├── window.h            # C API header for window management
 │   └── window.c            # GLFW window implementation
 ├── render/
-│   ├── renderer.h          # C API header for 2D primitives
+│   ├── renderer.h          # C API header for 2D primitives + batch switching
 │   ├── renderer.c          # OpenGL batched primitive renderer
 │   ├── texture.h           # C API header for textures
 │   ├── texture.c           # OpenGL texture loading/rendering (stb_image)
 │   ├── text.h              # C API header for text rendering
-│   └── text.c              # TrueType text rendering (stb_truetype)
+│   ├── text.c              # TrueType text rendering (stb_truetype)
+│   ├── camera.h            # C API header for 2D camera
+│   ├── camera.c            # Camera transform (position, zoom, rotation)
+│   ├── shader.h            # C API header for custom shaders
+│   ├── shader.c            # GLSL shader compilation and uniform management
+│   ├── ui.h                # C API header for immediate-mode UI
+│   └── ui.c                # IMGUI system (panels, buttons, sliders, labels)
 └── audio/
     ├── audio.h             # C API header for audio
     └── audio.c             # miniaudio implementation
@@ -46,7 +56,7 @@ external/                   # Third-party single-header libraries (vendored)
 └── stb/                    # Image loading (stb_image.h), font rasterization (stb_truetype.h)
 
 library/
-└── PudimBasicsGl.lua       # LuaLS (@meta) type definitions for LSP support
+└── PudimBasicsGl.lua       # LuaLS (@meta) type definitions for LSP support (with markdown docs)
 
 examples/                   # Example Lua scripts
 scripts/                    # Test scripts (bash)
@@ -81,6 +91,11 @@ luaopen_PudimBasicsGl(L)
   → lua_register_input_api(L)          // Creates PudimBasicsGl.input
   → lua_register_audio_api(L)          // Creates PudimBasicsGl.audio
   → lua_register_text_api(L)           // Creates PudimBasicsGl.text
+  → lua_register_camera_api(L)         // Creates PudimBasicsGl.camera
+  → lua_register_shader_api(L)         // Creates PudimBasicsGl.shader
+  → lua_register_studio_api(L)         // Creates PudimBasicsGl.studio
+  → lua_register_ui_api(L)             // Creates PudimBasicsGl.ui
+  → lua_register_math_api(L)           // Creates PudimBasicsGl.math
   → return 1                           // Return the table
 ```
 
@@ -92,12 +107,12 @@ There are **two distinct patterns** for how modules expose their API:
 
 ### Pattern 1: Userdata + Metatable (for objects with lifecycle)
 
-Used by: `window`, `texture`, `audio`
+Used by: `window`, `texture`, `audio`, `text`, `shader`
 
 These modules create **Lua userdata** wrapping a C pointer, with a named metatable for methods and `__gc` for automatic cleanup.
 
 Key elements:
-- A `#define` for the metatable name: `"PudimBasicsGl.Window"`, `"PudimBasicsGl.Texture"`, `"PudimBasicsGl.Sound"`
+- A `#define` for the metatable name: `"PudimBasicsGl.Window"`, `"PudimBasicsGl.Texture"`, `"PudimBasicsGl.Sound"`, `"PudimBasicsGl.Font"`, `"PudimBasicsGl.Shader"`
 - A `check_*()` helper to validate userdata: `luaL_checkudata(L, idx, METATABLE_NAME)`
 - Constructor functions pushed into the module subtable (e.g., `pb.texture.load()`)
 - Instance methods set as `__index` on the metatable (e.g., `texture:draw()`)
@@ -124,7 +139,7 @@ lua_setfield(L, -2, "__index");    // metatable.__index = methods_table
 
 ### Pattern 2: Plain Functions (for stateless modules)
 
-Used by: `renderer`, `input`, `time`, `math`
+Used by: `renderer`, `input`, `time`, `math`, `camera`, `studio`, `ui`
 
 These modules use **no userdata**. Functions are registered directly into a subtable. No metatables are needed.
 
@@ -150,7 +165,7 @@ void lua_register_*_api(lua_State* L) {
 
 - **Input keys**: Pushed as integers into the `input` subtable (`pb.input.KEY_SPACE`, `pb.input.KEY_W`, etc.)
 - **Colors**: Pushed as `{r, g, b, a}` tables into `pb.renderer.colors` (`pb.renderer.colors.RED`, etc.)
-- **Math constants**: Pushed as numbers into `pb.math` (`pb.math.PI`, `pb.math.TAU`, etc.)
+- **Math constants**: Pushed as numbers into `pb.math` (`pb.math.PI`, `pb.math.TAU`, `pb.math.HALF_PI`)
 
 ### Colon-call Compatibility
 
@@ -194,7 +209,7 @@ static void ensure_init(void) {
 | Registration function | `lua_register_*_api` | `lua_register_window_api()` |
 | Metatable name | `"PudimBasicsGl.Type"` | `"PudimBasicsGl.Window"`, `"PudimBasicsGl.Sound"` |
 | Metatable define | `TYPE_METATABLE` | `WINDOW_METATABLE`, `TEXTURE_METATABLE` |
-| Structs | `PascalCase` | `Window`, `Texture`, `Sound`, `Color` |
+| Structs | `PascalCase` | `Window`, `Texture`, `Sound`, `Font`, `Color` |
 | Constants/macros | `UPPER_SNAKE_CASE` | `MAX_VERTICES`, `COLOR_RED` |
 | Local variables | `snake_case` | `vertex_count`, `screen_width` |
 | Global state | `g_` prefix | `g_active_window`, `g_engine` |
@@ -208,7 +223,7 @@ static void ensure_init(void) {
 | Module name | `lowercase` | `pb.window`, `pb.renderer`, `pb.audio` |
 | Functions | `snake_case` | `pb.window.create()`, `pb.renderer.rect_filled()` |
 | Constants | `UPPER_SNAKE_CASE` | `pb.input.KEY_SPACE`, `pb.renderer.colors.RED` |
-| Types (LSP) | `PudimBasicsGl.module` for modules, `PascalCase` for objects | `PudimBasicsGl.window`, `Window`, `Texture`, `Sound` |
+| Types (LSP) | `PudimBasicsGl.module` for modules, `PascalCase` for objects | `PudimBasicsGl.window`, `Window`, `Texture`, `Sound`, `Font`, `Shader` |
 
 ### Files
 
@@ -273,11 +288,21 @@ make test         # Runs scripts/test_preload.sh
 
 ### Test Structure (`scripts/test_preload.sh`)
 
-The test script has **3 test sections** run sequentially:
+The test script has **13 test suites** (~267 tests total) run sequentially:
 
 1. **Preload test**: Verifies the `.so` loads and a window can be created without `LD_PRELOAD`
 2. **Input tests**: Verifies `pb.input` subtable, functions, key constants, mouse functions
 3. **Audio tests**: Verifies `pb.audio` subtable, functions, master volume, error handling
+4. **Text tests**: Verifies font loading, text drawing, measurement, size change, visual pixel readback
+5. **Camera tests**: Verifies position, zoom, rotation, screen/world conversion, look_at, reset
+6. **Render tests**: Verifies primitive rendering with visual pixel readback (rect, circle, triangle, line, gradient, UI mode)
+7. **Shader tests**: Verifies shader compilation from source and files, uniforms, error handling
+8. **Math tests**: Verifies vectors (vec2/vec3/vec4), operations (add/sub/scale/dot/normalize/length), lerp, clamp, radians, degrees, constants (PI/TAU/HALF_PI)
+9. **Studio tests**: Verifies list_dir, get_file_modified_time, copy_file, error handling
+10. **UI tests**: Verifies set_font, begin/end_frame, label rendering with pixel readback, panel, button, slider
+11. **Texture tests**: Verifies load, load_with_colorkey, get_size, draw, flush, draw_region, error handling
+12. **Window tests**: Verifies create, get_size, should_close, fullscreen, resize, VSync, title, position
+13. **Time tests**: Verifies update, delta, get, fps, sleep
 
 Each section uses a `check(name, condition)` helper pattern:
 ```lua
@@ -506,10 +531,12 @@ Key conventions:
 - `---@meta PudimBasicsGl` at the top
 - `---@class PudimBasicsGl` for the root table
 - `---@class PudimBasicsGl.modulename` for each subtable
-- `---@class TypeName` for userdata types (`Window`, `Texture`, `Sound`)
+- `---@class TypeName` for userdata types (`Window`, `Texture`, `Sound`, `Font`, `Shader`)
 - `---@field method fun(self: Type, ...) Description` for object methods
 - `---@param`, `---@return`, `---@overload` for function signatures
 - Optional parameters use `?` suffix: `a?` or `number?`
+- Documentation uses **markdown formatting**: bold for key terms, backticks for code, `### Example` with fenced code blocks, `> **Note:**` / `> **Warning:**` for callouts
+- The file ends with `return PudimBasicsGl` so that `require()` resolves typed annotations
 
 ---
 
@@ -546,10 +573,14 @@ Version format: `1.0.0-N` (semver with revision number).
 
 1. **OpenGL context required**: `renderer_init()`, texture loading, and similar functions require a window to be created first (GLFW provides the OpenGL context).
 
-2. **Flush before switching render modes**: Call `pb.renderer.flush()` before drawing textures, and `pb.texture.flush()` before drawing primitives, since they use different shaders/batches.
+2. **Auto-flush batch switching**: The renderer tracks the active batch type (`BATCH_PRIMITIVES`, `BATCH_TEXTURES`, `BATCH_TEXT`). Calling a draw function from a different batch automatically flushes the previous batch via `renderer_switch_batch()`. Manual `flush()` calls are no longer needed between different renderers. However, `renderer_end()` / `texture_flush()` / `text_flush()` should still be called at the end of the frame before `swap_buffers()`.
 
 3. **`package.cpath`**: When running from the project directory, scripts must set `package.cpath = "./?.so;" .. package.cpath` before `require()`.
 
-4. **Active window singleton**: `lua_window.c` stores a global `g_active_window` pointer used by the input module. Only the most recently created window receives input queries.
+4. **Active window singleton**: `lua_window.c` stores a global `g_active_window` pointer used by the input and UI modules. Only the most recently created window receives input queries.
 
 5. **GLFW preloading on Linux**: `window.c` uses `dlopen()` with `RTLD_GLOBAL` to preload `libglfw.so` so that GLAD can resolve symbols without the user needing `LD_PRELOAD`.
+
+6. **UI font must be set before first frame**: Call `pb.ui.set_font(font)` before any `pb.ui.begin_frame()`. The UI system initializes lazily on the first `begin_frame()`, but the font pointer is preserved across init.
+
+7. **UI mode rendering**: Use `pb.renderer.begin_ui()` / `pb.renderer.end_ui()` for screen-space rendering that ignores the 2D camera. The UI module (`pb.ui`) uses this internally.

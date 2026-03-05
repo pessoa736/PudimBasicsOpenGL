@@ -67,7 +67,11 @@ SRC = src/main.c \
       src/core/lua_text.c \
       src/core/lua_camera.c \
       src/core/lua_shader.c \
+      src/core/lua_studio.c \
+      src/core/lua_ui.c \
+      src/core/lua_math.c \
       src/render/text.c \
+      src/render/ui.c \
       src/render/shader.c \
       external/glad/src/glad.c
 

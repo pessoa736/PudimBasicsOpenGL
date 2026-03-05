@@ -2,6 +2,7 @@
 #define TEXT_H
 
 #include <glad/glad.h>
+#include <stddef.h>
 #include "renderer.h"
 
 // Maximum number of characters in the font atlas (ASCII 32-126)

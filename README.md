@@ -1,6 +1,6 @@
 # PudimBasicsGl - Pudim Basics OpenGL 
 
-A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, **text**, **time**, and **camera**.
+A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the essentials: **window management**, **2D rendering**, **textures**, **input**, **audio**, **text**, **time**, **camera**, **shaders**, **math**, **file utilities**, and **immediate-mode UI**.
 
 > [!WARNING]
 > This project is **experimental**. APIs and features may change without notice — use with caution.
@@ -10,14 +10,17 @@ A minimal 2D graphics library for Lua using OpenGL. PudimBasicsGl focuses on the
 ## Features
 
 - **Window**: Create and manage OpenGL windows with VSync, fullscreen, and resize support
-- **Renderer**: Draw 2D primitives (pixels, lines, rectangles, circles, triangles)
-- **Textures**: Load images (PNG, JPG, BMP, etc.) and draw them with rotation, tinting, and sprite sheet support
+- **Renderer**: Draw 2D primitives (pixels, lines, rectangles, circles, triangles, gradients) with automatic batch management
+- **Textures**: Load images (PNG, JPG, BMP, etc.) and draw them with rotation, tinting, chroma key, and sprite sheet support
 - **Input**: Keyboard and mouse input (key state, mouse position, cursor control)
 - **Audio**: Load and play audio files (WAV, MP3, FLAC) with volume, pitch, and looping via [miniaudio](https://github.com/mackron/miniaudio)
 - **Text**: Load TrueType fonts (.ttf) and render text with customizable size, color, and measurement via [stb_truetype](https://github.com/nothings/stb)
 - **Time**: Delta time, FPS, and timing utilities
 - **Camera**: 2D camera controls (position, zoom, rotation, look_at, screen/world conversion)
 - **Shader**: Custom GLSL shaders — compile from strings or load from files, set uniforms (int, float, vec2-4, mat4)
+- **Math**: Vector math (vec2/vec3/vec4), arithmetic, lerp, clamp, angle conversion, and constants (PI, TAU)
+- **Studio**: File system utilities (list directory, file timestamps, file copy)
+- **UI**: Immediate-mode GUI widgets (panels, buttons, sliders, labels) for tools and debug overlays
 
 ## Building
 
@@ -117,14 +120,12 @@ while not pb.window.should_close(window) do
     -- Draw primitives
     pb.renderer.rect_filled(100, 100, 50, 50, pb.renderer.colors.RED)
     pb.renderer.circle_filled(400, 300, 30, {r=0, g=1, b=0.5, a=1})
-    pb.renderer.flush()  -- Flush primitives before textures
     
-    -- Draw textures
+    -- Draw textures (auto-flushes primitives!)
     if texture then
         texture:draw(200, 200)  -- Simple draw
         texture:draw_rotated(400, 400, 64, 64, 45)  -- Rotated 45 degrees
     end
-    pb.texture.flush()
     
     pb.renderer.finish()
     
@@ -178,8 +179,7 @@ pb.audio.shutdown()
 -- Load a TrueType font at 32px
 local font = pb.text.load("my_font.ttf", 32)
 
--- Draw text (flush primitives first, different shader)
-pb.renderer.flush()
+-- Draw text (auto-flushing handles switching from primitives)
 font:draw("Hello, World!", 100, 100, 1, 1, 1) -- white text
 font:draw("Colored!", 100, 150, {r=1, g=0.5, b=0, a=1}) -- orange text
 
@@ -188,9 +188,6 @@ local w, h = font:measure("Hello, World!")
 
 -- Change font size dynamically
 font:set_size(48)
-
--- Flush text before drawing primitives again
-pb.text.flush()
 
 -- Cleanup
 font:destroy()
@@ -250,6 +247,10 @@ font:destroy()
 | `enable_blend(enabled)` | Enable/disable alpha blending |
 | `set_viewport(x, y, width, height)` | Set the OpenGL viewport |
 | `get_info()` | Get OpenGL info table (`version`, `renderer`, `vendor`, `glsl_version`) |
+| `begin_ui(screen_width, screen_height)` | Begin screen-space rendering that ignores the camera |
+| `end_ui()` | End UI mode rendering |
+| `rect_gradient(x, y, w, h, top_color, bottom_color)` | Draw a vertical color gradient rectangle |
+| `read_pixel(x, y, screen_height)` | Read a pixel from the framebuffer (returns r, g, b, a) |
 | `colors.WHITE`, `colors.RED`, etc. | Predefined colors |
 
 ### pb.texture
@@ -257,6 +258,7 @@ font:destroy()
 | Function | Description |
 |----------|-------------|
 | `load(filepath)` | Load texture from file (PNG, JPG, BMP, TGA) |
+| `load_with_colorkey(filepath, hex_color)` | Load texture and make a specific color transparent |
 | `create(w, h, data?)` | Create texture with optional RGBA data |
 | `flush()` | Flush pending texture draws |
 
@@ -339,7 +341,47 @@ font:destroy()
 | `font:get_line_height()` | Get line height in pixels |
 | `font:destroy()` | Free font resources |
 
-> **Note:** Call `pb.renderer.flush()` before drawing text, and `pb.text.flush()` before drawing primitives — they use different shaders.
+### pb.math
+
+| Function | Description |
+|----------|-------------|
+| `lerp(a, b, t)` | Linear interpolation |
+| `clamp(val, min, max)` | Clamp value between min and max |
+| `radians(deg)` | Convert degrees to radians |
+| `degrees(rad)` | Convert radians to degrees |
+| `vec2(x, y)` | Create a 2D vector `{x, y}` |
+| `vec3(x, y, z)` | Create a 3D vector `{x, y, z}` |
+| `vec4(x, y, z, w)` | Create a 4D vector `{x, y, z, w}` |
+| `vec_add(a, b)` | Add vectors |
+| `vec_sub(a, b)` | Subtract vectors |
+| `vec_scale(v, s)` | Scale vector by scalar |
+| `vec_length(v)` | Calculate vector length |
+| `vec_normalize(v)` | Normalize vector |
+| `vec_dot(a, b)` | Dot product of vectors |
+
+**Constants:** `pb.math.PI`, `pb.math.TAU`, `pb.math.HALF_PI`
+
+### pb.studio
+
+| Function | Description |
+|----------|-------------|
+| `list_dir(path)` | Returns a table of file names in the directory |
+| `get_file_modified_time(path)` | Get file modification timestamp (useful for hot-reload) |
+| `copy_file(src, dst)` | Copy a file from src to dst |
+
+### pb.ui
+
+Immediate-mode GUI widgets. First call `set_font` before the first frame.
+
+| Function | Description |
+|----------|-------------|
+| `set_font(font)` | Set the font used by UI widgets |
+| `begin_frame()` | Begin a new UI frame (reads mouse state automatically) |
+| `end_frame()` | End current UI frame and draw everything |
+| `label(text, x, y, color)` | Draw a text label |
+| `panel(title, x, y, w, h)` | Draw a background panel with title |
+| `button(id, label, x, y, w, h, color)` | Draw an interactive button (returns true if clicked) |
+| `slider(id, label, x, y, w, h, val, min, max)` | Draw an interactive slider (returns updated value) |
 
 ### pb.shader
 
