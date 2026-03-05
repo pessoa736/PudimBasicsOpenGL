@@ -86,7 +86,7 @@ luarocks install pudimbasicsgl
 Or build from the local rockspec:
 
 ```bash
-luarocks make pudimbasicsgl-1.0.0-17.rockspec
+luarocks make pudimbasicsgl-1.0.0-18.rockspec
 ```
 
 The rockspec uses the `builtin` build type — LuaRocks compiles all `.c` sources directly into `.so` (Linux) or `.dll` (Windows), no makefile needed. The `make` command is only required for local development.
